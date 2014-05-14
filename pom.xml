@@ -184,9 +184,10 @@
 		<url>http://sourceforge.net/tracker/?group_id=205064</url>
 	</issueManagement>
 	<scm>
-		<connection>scm:svn:https://mime-util.svn.sourceforge.net/svnroot/mime-util/trunk/MimeUtil</connection>
-		<developerConnection>scm:svn:https://mime-util.svn.sourceforge.net/svnroot/mime-util/trunk/MimeUtil</developerConnection>
-		<url>http://mime-util.svn.sourceforge.net/viewvc/mime-util/</url>
+                <connection>scm:git:https://github.com/taverna/taverna-mime-util.git</connection>
+                <developerConnection>scm:git:ssh://git@github.com:taverna/taverna-mime-util.git</developerConnection>
+                <url>https://github.com/taverna/taverna-mime-util</url>
+                <tag>HEAD</tag>
 	</scm>
 
 	<!-- 
