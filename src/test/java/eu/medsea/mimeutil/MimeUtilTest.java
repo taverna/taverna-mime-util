@@ -9,12 +9,11 @@ import java.util.Collection;
 
 import eu.medsea.mimeutil.MimeException;
 import eu.medsea.mimeutil.MimeUtil;
-
 import junit.framework.TestCase;
 
 public class MimeUtilTest extends TestCase {
 
-	private static Collection UNKNOWN_MIME_TYPE_COLLECTION = new MimeTypeHashSet();
+	private static Collection<Object> UNKNOWN_MIME_TYPE_COLLECTION = new MimeTypeHashSet();
 
 	private static MimeType UNKNOWN_MIME_TYPE = new MimeType("application/octet-stream");
 
@@ -22,12 +21,14 @@ public class MimeUtilTest extends TestCase {
 		UNKNOWN_MIME_TYPE_COLLECTION.add(UNKNOWN_MIME_TYPE);
 	}
 
+	@Override
 	public void setUp() {
 		MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
 		MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
 		MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.OpendesktopMimeDetector");
 	}
 
+	@Override
 	public void tearDown() {
 		MimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
 		MimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
@@ -113,15 +114,15 @@ public class MimeUtilTest extends TestCase {
 		// The default for MimeUtil.getMimeType() is to search by file extension first
 		// If the boolean parameter is true it will search by extension first else by sniffing first
 
-		assertTrue(MimeUtil.getMimeTypes("src/test/resources/e.xml").contains("application/xml"));
+		assertTrue(MimeUtil.getMimeTypes("src/test/resources/e.xml").contains(new MimeType("application/xml")));
 		assertTrue(MimeUtil.getMimeTypes("a.de").equals(UNKNOWN_MIME_TYPE_COLLECTION));
 
 		// Test for multiple extensions
-		assertTrue(MimeUtil.getMimeTypes("e.1.3.jar").contains("application/java-archive"));
+		assertTrue(MimeUtil.getMimeTypes("e.1.3.jar").contains(new MimeType("application/java-archive")));
 
 
 		// The following fails to detect using the OpendesktopMimeDetector
-		//assertTrue(MimeUtil.getMimeTypes("src/test/resources/d-png.img").contains("image/png"));
+		//assertTrue(MimeUtil.getMimeTypes("src/test/resources/d-png.img").contains(new MimeType("image/png")));
 	}
 
 	public void testGetMimeTypesAsByteArray() {
@@ -136,14 +137,14 @@ public class MimeUtilTest extends TestCase {
 			in.read(data, 0, 50);
 			in.close();
 			// The amount of data we read is to small to match the image/svg+xml rule
-			Collection mimeTypes = MimeUtil.getMimeTypes(data);
+			Collection<MimeType> mimeTypes = MimeUtil.getMimeTypes(data);
 			assertFalse(mimeTypes.contains("image/svg+xml"));
 			in = new FileInputStream(fileName);
 			// This is the minimum amount of data we need to read due to the between rule for the image/svg+xml
 			data = new byte [1024];
 			in.read(data, 0, 1024);
 			in.close();
-			assertTrue(MimeUtil.getMimeTypes(data).contains("image/svg+xml"));
+			assertTrue(MimeUtil.getMimeTypes(data).contains(new MimeType("image/svg+xml")));
 		}catch(Exception e) {
 			fail("Should not get here");
 		}
@@ -154,34 +155,34 @@ public class MimeUtilTest extends TestCase {
 		// If the boolean parameter is true it will search by extension first else by sniffing first
 
 		// Find by extension first
-		assertTrue(MimeUtil.getMimeTypes(new File("src/test/resources/e.xml")).contains("application/xml"));
+		assertTrue(MimeUtil.getMimeTypes(new File("src/test/resources/e.xml")).contains(new MimeType("application/xml")));
 		assertTrue(MimeUtil.getMimeTypes(new File("a.de")).equals(UNKNOWN_MIME_TYPE_COLLECTION));
 
 		// Test for multiple extensions
-		assertTrue(MimeUtil.getMimeTypes(new File("e.1.3.jar")).contains("application/java-archive"));
+		assertTrue(MimeUtil.getMimeTypes(new File("e.1.3.jar")).contains(new MimeType("application/java-archive")));
 
 
 		// The following test case fails to detect properly with the OpendesktopMimeDetector
-		//assertTrue(MimeUtil.getMimeTypes(new File("src/test/resources/d-png.img")).contains("image/png"));
+		//assertTrue(MimeUtil.getMimeTypes(new File("src/test/resources/d-png.img")).contains(new MimeType("image/png")));
 	}
 
 	public void testGetMimeTypesURL() {
 		try {
 			// In the root
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/MimeDetector.class")).contains("application/x-java-class"));
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/MimeDetector.java")).contains("text/x-java"));
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/a.html")).contains("text/html"));
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/c-gif.img")).contains("image/gif"));
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/e.svg")).contains("image/svg+xml"));
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/f.tar.gz")).contains("application/x-compressed-tar"));
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/e[xml]")).contains("application/xml"));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/MimeDetector.class")).contains(new MimeType("application/x-java-class")));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/MimeDetector.java")).contains(new MimeType("text/x-java")));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/a.html")).contains(new MimeType("text/html")));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/c-gif.img")).contains(new MimeType("image/gif")));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/e.svg")).contains(new MimeType("image/svg+xml")));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/f.tar.gz")).contains(new MimeType("application/x-compressed-tar")));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/e[xml]")).contains(new MimeType("application/xml")));
 
 			// In sub-directories
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/resources/eu/medsea/mimeutil/magic.mime")).contains("www/mime"));
-			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/resources/eu/medsea/mimeutil/mime-types.properties")).contains("text/plain"));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/resources/eu/medsea/mimeutil/magic.mime")).contains(new MimeType("www/mime")));
+			assertTrue(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/resources/eu/medsea/mimeutil/mime-types.properties")).contains(new MimeType("text/plain")));
 
 			// This one will log an exception due to no entry defined
-			assertFalse(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/")).contains("application/xml"));
+			assertFalse(MimeUtil.getMimeTypes(new URL("jar:file:src/test/resources/a.zip!/")).contains(new MimeType("application/xml")));
 		}catch(Exception e) {
 			fail("Should not get here " + e.getLocalizedMessage());
 		}

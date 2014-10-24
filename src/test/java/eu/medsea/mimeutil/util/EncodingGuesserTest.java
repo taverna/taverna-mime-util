@@ -26,12 +26,14 @@ import junit.framework.TestCase;
 
 public class EncodingGuesserTest extends TestCase {
 
+	@Override
 	public void setUp() {
 		EncodingGuesser.setSupportedEncodings(EncodingGuesser.getCanonicalEncodingNamesSupportedByJVM());
 	}
 
+	@Override
 	public void tearDown() {
-		EncodingGuesser.setSupportedEncodings(new ArrayList());
+		EncodingGuesser.setSupportedEncodings(new ArrayList<String>());
 	}
 
 	public void test_UTF_8_EncodingWithAndWithoutBOM() {
@@ -41,7 +43,7 @@ public class EncodingGuesserTest extends TestCase {
 
 		byte [] data = concatenateByteArrays(utf8_bom, message.getBytes());
 
-		Collection encodings = EncodingGuesser.getPossibleEncodings(data);
+		Collection<String> encodings = EncodingGuesser.getPossibleEncodings(data);
 		assertTrue(encodings.size() == 1);
 		assertTrue(encodings.contains("UTF-8"));
 
@@ -64,7 +66,7 @@ public class EncodingGuesserTest extends TestCase {
 	}
 
 	public void testInitialAndLimitedSetOfSupportedEncodings() {
-		Collection currentEncodings = null;
+		Collection<String> currentEncodings = null;
 
 		// Know text files
 		String [] fileLocations = new String [] {"src/test/resources/e-svg.img", "src/test/resources/e.svg", "src/test/resources/e.xml",
@@ -86,7 +88,7 @@ public class EncodingGuesserTest extends TestCase {
 				if(length < 1024) {
 					data = EncodingGuesser.getByteArraySubArray(data, 0, length);
 				}
-				Collection possibleEncodings = EncodingGuesser.getPossibleEncodings(data);
+				Collection<String> possibleEncodings = EncodingGuesser.getPossibleEncodings(data);
 
 				// We expect a large number of matches per file one of which should be UTF-8
 				assertTrue(possibleEncodings.size() != 1);
@@ -98,7 +100,7 @@ public class EncodingGuesserTest extends TestCase {
 
 
 			// Now set the supported encodings to this limited list
-			Collection limitedEncodingList = new ArrayList();
+			Collection<String> limitedEncodingList = new ArrayList<>();
 			limitedEncodingList.add("windows-1251");
 			currentEncodings = EncodingGuesser.setSupportedEncodings(limitedEncodingList);
 
@@ -114,7 +116,7 @@ public class EncodingGuesserTest extends TestCase {
 				if(length < 1024) {
 					data = EncodingGuesser.getByteArraySubArray(data, 0, length);
 				}
-				Collection possibleEncodings = EncodingGuesser.getPossibleEncodings(data);
+				Collection<String> possibleEncodings = EncodingGuesser.getPossibleEncodings(data);
 
 				// We expect only one match per file and that should be windows-1251
 				assertTrue(possibleEncodings.size() == 1);

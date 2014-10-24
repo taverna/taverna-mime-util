@@ -58,9 +58,9 @@ import java.util.Set;
  * @author Steven McArdle
  *
  */
-class MimeTypeHashSet implements Set, Collection {
+class MimeTypeHashSet implements Set<Object>, Collection<Object> {
 
-	private Set hashSet = new LinkedHashSet();
+	private Set<Object> hashSet = new LinkedHashSet<Object>();
 
 	MimeTypeHashSet() {}
 
@@ -69,7 +69,7 @@ class MimeTypeHashSet implements Set, Collection {
 	 *
 	 * @param collection See the introduction to this class for a description of the elements the Collection can contain.
 	 */
-	MimeTypeHashSet(final Collection collection) {
+	MimeTypeHashSet(final Collection<?> collection) {
 		addAll(collection);
 	}
 
@@ -78,7 +78,7 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @param initialCapacity
 	 */
 	MimeTypeHashSet(final int initialCapacity) {
-		hashSet = new HashSet(initialCapacity);
+		hashSet = new HashSet<>(initialCapacity);
 	}
 
 	/**
@@ -87,7 +87,7 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @param loadFactor
 	 */
 	MimeTypeHashSet(final int initialCapacity, float loadFactor) {
-		hashSet = new HashSet(initialCapacity, loadFactor);
+		hashSet = new HashSet<>(initialCapacity, loadFactor);
 	}
 
 	/**
@@ -133,6 +133,7 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @param arg0 can be a MimeType, String, String [] or Collection. See the introduction to this class.
 	 * @return true if the set did not already contain the specified element.
 	 */
+	@Override
 	public boolean add(final Object arg0) {
 		if(arg0 == null) {
 			// We don't allow null
@@ -149,7 +150,7 @@ class MimeTypeHashSet implements Set, Collection {
 
 		} else if(arg0 instanceof Collection) {
 			// Add a collection
-			return addAll((Collection)arg0);
+			return addAll((Collection<?>)arg0);
 		} else if(arg0 instanceof String) {
 			// Add a string representation of a mime type that could be a comma separated list
 			String [] mimeTypes = ((String)arg0).split(",");
@@ -193,12 +194,13 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @return true if this collection changed as a result of the call.
 	 * @throws NullPointerException
 	 */
-	public boolean addAll(final Collection arg0) throws NullPointerException {
+	@Override
+	public boolean addAll(final Collection<?> arg0) throws NullPointerException {
 		if(arg0 == null) {
 			throw new NullPointerException();
 		}
 		boolean added = false;
-		for(Iterator it = arg0.iterator(); it.hasNext();) {
+		for(Iterator<?> it = arg0.iterator(); it.hasNext();) {
 			try {
 				if(add(it.next())) {
 					added = true;
@@ -213,6 +215,7 @@ class MimeTypeHashSet implements Set, Collection {
 	/**
 	 * @see LinkedHashSet#clear()
 	 */
+	@Override
 	public void clear() {
 		hashSet.clear();
 	}
@@ -222,11 +225,12 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @param an object representing one of the recognised types that can represent mime types.
 	 * @return true if this set contains the specified element or elements.
 	 */
+	@Override
 	public boolean contains(final Object o) {
 		if(o instanceof MimeType) {
 			return hashSet.contains(o);
 		} else if(o instanceof Collection) {
-			return containsAll((Collection)o);
+			return containsAll((Collection<?>)o);
 		} else if(o instanceof String) {
 			String [] parts = ((String) o).split(",");
 			for(int i = 0; i < parts.length; i++) {
@@ -257,11 +261,12 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @ return true if this collection contains all of the elements in the specified collection.
 	 * @ throws NullPointerException if the passed in argument in null.
 	 */
-	public boolean containsAll(final Collection arg0) {
+	@Override
+	public boolean containsAll(final Collection<?> arg0) {
 		if(arg0 == null) {
 			throw new NullPointerException();
 		}
-		for(Iterator it = arg0.iterator(); it.hasNext();){
+		for(Iterator<?> it = arg0.iterator(); it.hasNext();){
 			if(!contains(it.next())) {
 				return false;
 			}
@@ -272,6 +277,7 @@ class MimeTypeHashSet implements Set, Collection {
 	/**
 	 * @see LinkedHashSet#isEmpty()
 	 */
+	@Override
 	public boolean isEmpty() {
 		return hashSet.isEmpty();
 	}
@@ -279,7 +285,8 @@ class MimeTypeHashSet implements Set, Collection {
 	/**
 	 * @see LinkedHashSet#iterator()
 	 */
-	public Iterator iterator() {
+	@Override
+	public Iterator<Object> iterator() {
 		return hashSet.iterator();
 	}
 
@@ -288,6 +295,7 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @param o - Object to be removed
 	 * @return true if the set was modified.
 	 */
+	@Override
 	public boolean remove(final Object o) {
 		boolean removed = false;
 		if(o == null) {
@@ -313,7 +321,7 @@ class MimeTypeHashSet implements Set, Collection {
 				}
 			}
 		}else if(o instanceof Collection) {
-			return removeAll((Collection)o);
+			return removeAll((Collection<?>)o);
 		}
 		return removed;
 	}
@@ -324,12 +332,13 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @return true if the set was modified.
 	 * @throws NullPointerException if the Collection passed in is null
 	 */
-	public boolean removeAll(final Collection arg0) {
+	@Override
+	public boolean removeAll(final Collection<?> arg0) {
 		if(arg0 == null) {
 			throw new NullPointerException();
 		}
 		boolean removed = false;
-		for(Iterator it = ((Collection)arg0).iterator(); it.hasNext();) {
+		for(Iterator<?> it = ((Collection<?>)arg0).iterator(); it.hasNext();) {
 			if(remove(it.next())) {
 				removed = true;
 			}
@@ -344,18 +353,20 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @param arg0 - collection of types each of which can represent a mime type.
 	 * @ return true if this collection changed as a result of the call.
 	 */
-	public boolean retainAll(final Collection arg0) {
+	@Override
+	public boolean retainAll(final Collection<?> arg0) {
 		if(arg0 == null) {
 			throw new NullPointerException();
 		}
 		// Make sure our collection is a real collection of MimeType(s)
-		Collection c = new MimeTypeHashSet(arg0);
+		Collection<?> c = new MimeTypeHashSet(arg0);
 		return hashSet.retainAll(c);
 	}
 
 	/**
 	 * @see LinkedHashSet#size()
 	 */
+	@Override
 	public int size() {
 		return hashSet.size();
 	}
@@ -363,6 +374,7 @@ class MimeTypeHashSet implements Set, Collection {
 	/**
 	 * @see LinkedHashSet#toArray()
 	 */
+	@Override
 	public Object[] toArray() {
 		return hashSet.toArray();
 	}
@@ -370,16 +382,18 @@ class MimeTypeHashSet implements Set, Collection {
 	/**
 	 * @see LinkedHashSet#add(Object)
 	 */
-	public Object[] toArray(final Object[] arg0) {
+	@Override
+	public <T> T[] toArray(final T[] arg0) {
 		return hashSet.toArray(arg0);
 	}
 
 	/**
 	 * Create a String representation of this Collection as a comma separated list
 	 */
+	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
-		for(Iterator it = iterator(); it.hasNext();) {
+		for(Iterator<?> it = iterator(); it.hasNext();) {
 			buf.append(((MimeType)it.next()).toString());
 			if(it.hasNext()) {
 				buf.append(",");
@@ -393,16 +407,17 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @param o - Object to be compared for equality with this set.
 	 * @return true if the specified object is equal to this set.
 	 */
+	@Override
 	public boolean equals(final Object o) {
 		if(o == null) {
 			return false;
 		}
-		Collection c = new MimeTypeHashSet();
+		Collection<Object> c = new MimeTypeHashSet();
 		c.add(o);
 		return match(c);
 	}
 
-	private boolean match(final Collection c) {
+	private boolean match(final Collection<?> c) {
 		if(this.size() != c.size()) {
 			return false;
 		}
@@ -416,6 +431,15 @@ class MimeTypeHashSet implements Set, Collection {
 		return true;
 	}
 
+	// Cheap and dirty way of computing the hash code that ignores member order
+	@Override
+	public int hashCode() {
+		int hash = 0;
+		for (Object o : this)
+			hash += o.hashCode();
+		return hash;
+	}
+
 	private void updateSpecificity(final MimeType o) {
 		MimeType mimeType = get(o);
 		int specificity = mimeType.getSpecificity() + o.getSpecificity();
@@ -424,7 +448,7 @@ class MimeTypeHashSet implements Set, Collection {
 	}
 
 	private MimeType get(MimeType mimeType) {
-		for(Iterator it = hashSet.iterator(); it.hasNext();) {
+		for(Iterator<?> it = hashSet.iterator(); it.hasNext();) {
 			MimeType mt = (MimeType)it.next();
 			if(mt.equals(mimeType)) {
 				return mt;
@@ -447,15 +471,23 @@ class MimeTypeHashSet implements Set, Collection {
 	 * @return Collection of matching MimeType(s) or an empty set if no matches found
 	 * @see String#matches(String) for a full description of the regular expression matching
 	 */
-	public Collection matches(String pattern) {
-		Collection c = new MimeTypeHashSet();
+	public Collection<Object> matches(String pattern) {
+		Collection<Object> c = new MimeTypeHashSet();
 
-		for(Iterator it = iterator(); it.hasNext();) {
+		for(Iterator<?> it = iterator(); it.hasNext();) {
 			MimeType mimeType = (MimeType)it.next();
 			if(mimeType.toString().matches(pattern)) {
 				c.add(mimeType);
 			}
 		}
 		return c;
+	}
+
+	Set<MimeType> getTypedSet() {
+		Set<MimeType> result = new LinkedHashSet<MimeType>();
+		for (Object item : this)
+			if (item instanceof MimeType)
+				result.add((MimeType) item);
+		return result;
 	}
 }

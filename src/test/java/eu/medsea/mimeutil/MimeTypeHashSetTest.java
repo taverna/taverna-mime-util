@@ -29,6 +29,7 @@ import junit.framework.TestCase;
  * @author Steven McArdle
  *
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class MimeTypeHashSetTest extends TestCase {
 
 	public final void testMimeTypeHashSet() {
@@ -279,6 +280,7 @@ public class MimeTypeHashSetTest extends TestCase {
 			// We add a comparator to the TreeSet to allow String and MimeType objects to be compared with a String.
 			// Without this we would get a ClassCastException as soon as we add the String object after the MimeType object.
 			// This is only important because we chose to add String's and MimeType's to the TreeSet.
+			@Override
 			public int compare(Object o1, Object o2) {
 				return o1.toString().compareTo(o2.toString());
 			}

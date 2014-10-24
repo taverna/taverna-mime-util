@@ -23,9 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import eu.medsea.mimeutil.MimeType;
 import eu.medsea.util.StringUtil;
@@ -48,7 +46,7 @@ class MagicMimeEntry {
 	public static final int BYTE_TYPE = 7;
 	public static final int UNKNOWN_TYPE = 20;
 
-	private ArrayList subEntries = new ArrayList();
+	private ArrayList<MagicMimeEntry> subEntries = new ArrayList<>();
 	private int checkBytesFrom;
 	private int type;
 	private String typeStr;
@@ -62,12 +60,12 @@ class MagicMimeEntry {
 
 	boolean isBetween; // used for range checking strings.
 
-	public MagicMimeEntry(ArrayList entries)
+	public MagicMimeEntry(ArrayList<?> entries)
 			throws InvalidMagicMimeEntryException {
 		this(0, null, entries);
 	}
 
-	private MagicMimeEntry(int level, MagicMimeEntry parent, ArrayList entries)
+	private MagicMimeEntry(int level, MagicMimeEntry parent, ArrayList<?> entries)
 			throws InvalidMagicMimeEntryException {
 		if (entries == null || entries.size() == 0) {
 			return;
@@ -95,6 +93,7 @@ class MagicMimeEntry {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return "MimeMagicType: " + checkBytesFrom + ", " + type + ", "
 				+ content + ", " + mimeType + ", " + mimeEnc;
@@ -144,14 +143,14 @@ class MagicMimeEntry {
 		String[] tokens = trimmed.split("\t");
 
 		// Now strip the empty entries
-		Vector v = new Vector();
+		ArrayList<String> v = new ArrayList<>();
 		for (int i = 0; i < tokens.length; i++) {
 			if (!"".equals(tokens[i])) {
 				v.add(tokens[i]);
 			}
 		}
 		tokens = new String[v.size()];
-		tokens = (String[]) v.toArray(tokens);
+		tokens = v.toArray(tokens);
 
 		if (tokens.length > 0) {
 			String tok = tokens[0].trim();
@@ -522,8 +521,7 @@ class MagicMimeEntry {
 
 	private int getInputStreamMarkLength() {
 		int len = _getInputStreamMarkLength();
-		for (Iterator it = subEntries.iterator(); it.hasNext();) {
-			MagicMimeEntry subEntry = (MagicMimeEntry) it.next();
+		for (MagicMimeEntry subEntry : subEntries) {
 			int subLen = subEntry.getInputStreamMarkLength();
 			if (len < subLen)
 				len = subLen;
@@ -859,8 +857,7 @@ class MagicMimeEntry {
 		if (this.mimeType != null && this.mimeType.equals(mimeType))
 			return true;
 
-		for (Iterator it = subEntries.iterator(); it.hasNext();) {
-			MagicMimeEntry subEntry = (MagicMimeEntry) it.next();
+		for (MagicMimeEntry subEntry : subEntries) {
 			if (subEntry.containsMimeType(mimeType))
 				return true;
 		}
@@ -871,7 +868,7 @@ class MagicMimeEntry {
 		return parent;
 	}
 
-	public List getSubEntries() {
+	public List<MagicMimeEntry> getSubEntries() {
 		return Collections.unmodifiableList(subEntries);
 	}
 }

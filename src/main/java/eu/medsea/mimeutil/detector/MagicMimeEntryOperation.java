@@ -29,7 +29,7 @@ import java.util.Map;
  */
 final class MagicMimeEntryOperation
 {
-	private static final Map operationID2operation = new HashMap();
+	private static final Map<Character,MagicMimeEntryOperation> operationID2operation = new HashMap<>();
 
 	public static final MagicMimeEntryOperation EQUALS = new MagicMimeEntryOperation('=');
 	public static final MagicMimeEntryOperation LESS_THAN = new MagicMimeEntryOperation('<');
@@ -43,7 +43,7 @@ final class MagicMimeEntryOperation
 	public static MagicMimeEntryOperation getOperation(char operationID)
 	{
 		Character operationIDCharacter = new Character(operationID);
-		return (MagicMimeEntryOperation) operationID2operation.get(operationIDCharacter);
+		return operationID2operation.get(operationIDCharacter);
 	}
 
 	public static MagicMimeEntryOperation getOperationForStringField(String content)
@@ -89,6 +89,7 @@ final class MagicMimeEntryOperation
 		registerOperation(this);
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -96,6 +97,7 @@ final class MagicMimeEntryOperation
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
 		if (obj == null) return false;
@@ -108,6 +110,7 @@ final class MagicMimeEntryOperation
 		return operationID;
 	}
 
+	@Override
 	public String toString() {
 		return this.getClass().getName() + '[' + operationID + ']';
 	}

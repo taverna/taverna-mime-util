@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +112,7 @@ public class MimeUtil2 {
 
 	// All mime types known to the utility. This is synchronised for multi-threaded use
 	// and ALL instances of MimeUtil2 share this list.
-	private static Map mimeTypes = Collections.synchronizedMap(new HashMap());
+	private static Map<String,Set<String>> mimeTypes = Collections.synchronizedMap(new HashMap<String,Set<String>>());
 
 	// the native byte order of the underlying OS. "BIG" or "little" Endian
 	private static ByteOrder nativeByteOrder = ByteOrder.nativeOrder();
@@ -179,9 +178,9 @@ public class MimeUtil2 {
 		try {
 
 			String key = getMediaType(mimeType);
-			Set s = (Set) mimeTypes.get(key);
+			Set<String> s = mimeTypes.get(key);
 			if (s == null) {
-				s = new TreeSet();
+				s = new TreeSet<>();
 			}
 			s.add(getSubType(mimeType));
 			mimeTypes.put(key, s);
@@ -337,7 +336,7 @@ public class MimeUtil2 {
 	 * @return all matching MimeType(s)
 	 * @throws MimeException
 	 */
-	public final Collection getMimeTypes(final byte [] data) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final byte [] data) throws MimeException
 	{
 		return getMimeTypes(data, UNKNOWN_MIME_TYPE);
 	}
@@ -351,9 +350,9 @@ public class MimeUtil2 {
 	 * @return all matching MimeType(s)
 	 * @throws MimeException
 	 */
-	public final Collection getMimeTypes(final byte [] data, final MimeType unknownMimeType) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final byte [] data, final MimeType unknownMimeType) throws MimeException
 	{
-		Collection mimeTypes = new MimeTypeHashSet();
+		MimeTypeHashSet mimeTypes = new MimeTypeHashSet();
 		if(data == null) {
 			log.error("byte array cannot be null.");
 		} else {
@@ -377,7 +376,7 @@ public class MimeUtil2 {
 		if(log.isDebugEnabled()) {
 			log.debug("Retrieved MIME types [" + mimeTypes.toString() + "]");
 		}
-		return mimeTypes;
+		return mimeTypes.getTypedSet();
 	}
 
 	/**
@@ -390,7 +389,7 @@ public class MimeUtil2 {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public final Collection getMimeTypes(final File file) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final File file) throws MimeException
 	{
 		return getMimeTypes(file, UNKNOWN_MIME_TYPE);
 	}
@@ -407,9 +406,9 @@ public class MimeUtil2 {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public final Collection getMimeTypes(final File file, final MimeType unknownMimeType) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final File file, final MimeType unknownMimeType) throws MimeException
 	{
-		Collection mimeTypes = new MimeTypeHashSet();
+		MimeTypeHashSet mimeTypes = new MimeTypeHashSet();
 
 		if(file == null) {
 			log.error("File reference cannot be null.");
@@ -421,7 +420,7 @@ public class MimeUtil2 {
 
 			if(file.isDirectory()) {
 				mimeTypes.add(MimeUtil2.DIRECTORY_MIME_TYPE);
-				return mimeTypes;
+				return mimeTypes.getTypedSet();
 			}
 
 			// Defer this call to the file name and stream methods
@@ -437,7 +436,7 @@ public class MimeUtil2 {
 		if(log.isDebugEnabled()) {
 			log.debug("Retrieved MIME types [" + mimeTypes.toString() + "]");
 		}
-		return mimeTypes;
+		return mimeTypes.getTypedSet();
 	}
 
 	/**
@@ -450,7 +449,7 @@ public class MimeUtil2 {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public final Collection getMimeTypes(final InputStream in) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final InputStream in) throws MimeException
 	{
 		return getMimeTypes(in, UNKNOWN_MIME_TYPE);
 	}
@@ -467,9 +466,9 @@ public class MimeUtil2 {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public final Collection getMimeTypes(final InputStream in, final MimeType unknownMimeType) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final InputStream in, final MimeType unknownMimeType) throws MimeException
 	{
-		Collection mimeTypes = new MimeTypeHashSet();
+		MimeTypeHashSet mimeTypes = new MimeTypeHashSet();
 
 		if(in == null) {
 			log.error("InputStream reference cannot be null.");
@@ -492,7 +491,7 @@ public class MimeUtil2 {
 		if(log.isDebugEnabled()) {
 			log.debug("Retrieved MIME types [" + mimeTypes.toString() + "]");
 		}
-		return mimeTypes;
+		return mimeTypes.getTypedSet();
 	}
 
 	/**
@@ -505,7 +504,7 @@ public class MimeUtil2 {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public final Collection getMimeTypes(final String fileName) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final String fileName) throws MimeException
 	{
 		return getMimeTypes(fileName, UNKNOWN_MIME_TYPE);
 	}
@@ -522,9 +521,9 @@ public class MimeUtil2 {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public final Collection getMimeTypes(final String fileName, final MimeType unknownMimeType) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final String fileName, final MimeType unknownMimeType) throws MimeException
 	{
-		Collection mimeTypes = new MimeTypeHashSet();
+		MimeTypeHashSet mimeTypes = new MimeTypeHashSet();
 
 		if(fileName == null) {
 			log.error("fileName cannot be null.");
@@ -537,7 +536,7 @@ public class MimeUtil2 {
 			File file = new File(fileName);
 			if(file.isDirectory()) {
 				mimeTypes.add(MimeUtil2.DIRECTORY_MIME_TYPE);
-				return mimeTypes;
+				return mimeTypes.getTypedSet();
 			}
 
 			mimeTypes.addAll(mimeDetectorRegistry.getMimeTypes(fileName));
@@ -552,7 +551,7 @@ public class MimeUtil2 {
 		if(log.isDebugEnabled()) {
 			log.debug("Retrieved MIME types [" + mimeTypes.toString() + "]");
 		}
-		return mimeTypes;
+		return mimeTypes.getTypedSet();
 
 	}
 
@@ -566,14 +565,14 @@ public class MimeUtil2 {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public final Collection getMimeTypes(final URL url) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final URL url) throws MimeException
 	{
 		return getMimeTypes(url, UNKNOWN_MIME_TYPE);
 	}
 
-	public final Collection getMimeTypes(final URL url, final MimeType unknownMimeType) throws MimeException
+	public final Collection<MimeType> getMimeTypes(final URL url, final MimeType unknownMimeType) throws MimeException
 	{
-		Collection mimeTypes = new MimeTypeHashSet();
+		MimeTypeHashSet mimeTypes = new MimeTypeHashSet();
 
 		if(url == null) {
 			log.error("URL reference cannot be null.");
@@ -586,7 +585,7 @@ public class MimeUtil2 {
 			File file = new File(url.getPath());
 			if(file.isDirectory()) {
 				mimeTypes.add(MimeUtil2.DIRECTORY_MIME_TYPE);
-				return mimeTypes;
+				return mimeTypes.getTypedSet();
 			}
 
 			// defer these calls to the file name and stream methods
@@ -602,7 +601,7 @@ public class MimeUtil2 {
 		if(log.isDebugEnabled()) {
 			log.debug("Retrieved MIME types [" + mimeTypes.toString() + "]");
 		}
-		return mimeTypes;
+		return mimeTypes.getTypedSet();
 	}
 
 	/**
@@ -686,11 +685,10 @@ public class MimeUtil2 {
 	 * @return the most specific MimeType. If more than one of the mime types in the Collection
 	 * have the same value then the first one found with this value in the Collection is returned.
 	 */
-	public static MimeType getMostSpecificMimeType(final Collection mimeTypes) {
+	public static MimeType getMostSpecificMimeType(final Collection<MimeType> mimeTypes) {
 		MimeType mimeType = null;
 		int specificity = 0;
-		for(Iterator it = mimeTypes.iterator(); it.hasNext();) {
-			MimeType mt = (MimeType)it.next();
+		for (MimeType mt : mimeTypes) {
 			if(mt.getSpecificity() > specificity) {
 				mimeType = mt;
 			}
@@ -724,7 +722,7 @@ public class MimeUtil2 {
 	 */
 	public static boolean isMimeTypeKnown(final MimeType mimeType) {
 		try {
-			Set s = (Set) mimeTypes.get(mimeType.getMediaType());
+			Set<?> s = mimeTypes.get(mimeType.getMediaType());
 			if (s == null) {
 				return false;
 			}
@@ -797,7 +795,7 @@ public class MimeUtil2 {
 	// Check each entry in each of the wanted lists against the entries in the
 	// can provide list.
 	// We take into consideration the QoS indicator
-	private static MimeType getBestMatch(final String accept, final List canProvideList) {
+	private static MimeType getBestMatch(final String accept, final List<String> canProvideList) {
 
 		if (canProvideList.size() == 1) {
 			// If we only have one mime type that can be provided then thats
@@ -808,16 +806,12 @@ public class MimeUtil2 {
 			return new MimeType((String) canProvideList.get(0));
 		}
 
-		Map wantedMap = normaliseWantedMap(accept, canProvideList);
+		Map<String, List<String>> wantedMap = normaliseWantedMap(accept, canProvideList);
 
 		MimeType bestMatch = null;
 		double qos = 0.0;
-		Iterator it = wantedMap.keySet().iterator();
-		while (it.hasNext()) {
-			List wantedList = (List) wantedMap.get(it.next());
-			Iterator it2 = wantedList.iterator();
-			while (it2.hasNext()) {
-				String mimeType = (String) it2.next();
+		for (List<String> wantedList : wantedMap.values()) {
+			for (String mimeType : wantedList) {
 				double q = getMimeQuality(mimeType);
 				String majorComponent = getMediaType(mimeType);
 				String minorComponent = getSubType(mimeType);
@@ -832,8 +826,8 @@ public class MimeUtil2 {
 	}
 
 	// Turn a comma separated string into a list
-	private static List getList(final String options) {
-		List list = new ArrayList();
+	private static List<String> getList(final String options) {
+		List<String> list = new ArrayList<>();
 		String[] array = options.split(",");
 		for (int i = 0; i < array.length; i++) {
 			list.add(array[i].trim());
@@ -843,8 +837,8 @@ public class MimeUtil2 {
 
 	// Turn a comma separated string of accepted mime types into a Map
 	// based on the list of mime types that can be provided
-	private static Map normaliseWantedMap(final String accept, final List canProvide) {
-		Map map = new LinkedHashMap();
+	private static Map<String,List<String>> normaliseWantedMap(final String accept, final List<String> canProvide) {
+		Map<String,List<String>> map = new LinkedHashMap<>();
 		String[] array = accept.split(",");
 
 		for (int i = 0; i < array.length; i++) {
@@ -856,24 +850,20 @@ public class MimeUtil2 {
 			if (StringUtil.contains(major ,"*")) {
 				// All canProvide types are acceptable with the qos defined OR
 				// 0.01 if not defined
-				Iterator it = canProvide.iterator();
-				while (it.hasNext()) {
-					String mt = (String) it.next();
-					List list = (List) map.get(getMediaType(mt));
+				for (String mt : canProvide) {
+					List<String> list = map.get(getMediaType(mt));
 					if (list == null) {
-						list = new ArrayList();
+						list = new ArrayList<>();
 					}
 					list.add(mt + ";q=" + qos);
 					map.put(getMediaType(mt), list);
 				}
 			} else if (StringUtil.contains(minor, "*")) {
-				Iterator it = canProvide.iterator();
-				while (it.hasNext()) {
-					String mt = (String) it.next();
+				for (String mt : canProvide) {
 					if (getMediaType(mt).equals(major)) {
-						List list = (List) map.get(major);
+						List<String> list = map.get(major);
 						if (list == null) {
-							list = new ArrayList();
+							list = new ArrayList<>();
 						}
 						list.add(major + "/" + getSubType(mt) + ";q="
 								+ qos);
@@ -883,9 +873,9 @@ public class MimeUtil2 {
 
 			} else {
 				if (canProvide.contains(major + "/" + minor)) {
-					List list = (List) map.get(major);
+					List<String> list = map.get(major);
 					if (list == null) {
-						list = new ArrayList();
+						list = new ArrayList<>();
 					}
 					list.add(major + "/" + minor + ";q=" + qos);
 					map.put(major, list);
@@ -931,7 +921,7 @@ class MimeDetectorRegistry {
 	private TextMimeDetector TextMimeDetector = new TextMimeDetector(1);
 
 
-	private Map mimeDetectors = new TreeMap();
+	private Map<String,MimeDetector> mimeDetectors = new TreeMap<>();
 
 	/**
 	 * Use the fully qualified name of a MimeDetector and try to instantiate it if
@@ -965,9 +955,9 @@ class MimeDetectorRegistry {
 		return (MimeDetector)mimeDetectors.get(name);
 	}
 
-	Collection getMimeTypes(final byte [] data) throws MimeException
+	Collection<MimeType> getMimeTypes(final byte [] data) throws MimeException
 	{
-		Collection mimeTypes = new ArrayList();
+		Collection<MimeType> mimeTypes = new ArrayList<>();
 		try {
 			if(!EncodingGuesser.getSupportedEncodings().isEmpty()) {
 				mimeTypes = TextMimeDetector.getMimeTypes(data);
@@ -976,9 +966,8 @@ class MimeDetectorRegistry {
 			// The TextMimeDetector will throw this if it decides
 			// the content is not text
 		}
-		for(Iterator it  = mimeDetectors.values().iterator();it.hasNext();) {
+		for (MimeDetector md : mimeDetectors.values()) {
 			try {
-				MimeDetector md = (MimeDetector)it.next();
 				mimeTypes.addAll(md.getMimeTypes(data));
 			}catch(UnsupportedOperationException ignore) {
 				// We ignore this as it indicates that this MimeDetector does not support
@@ -992,9 +981,9 @@ class MimeDetectorRegistry {
 
 
 
-	Collection getMimeTypes(final String fileName) throws MimeException
+	Collection<MimeType> getMimeTypes(final String fileName) throws MimeException
 	{
-		Collection mimeTypes = new ArrayList();
+		Collection<MimeType> mimeTypes = new ArrayList<>();
 		try {
 			if(!EncodingGuesser.getSupportedEncodings().isEmpty()) {
 				mimeTypes = TextMimeDetector.getMimeTypes(fileName);
@@ -1003,9 +992,8 @@ class MimeDetectorRegistry {
 			// The TextMimeDetector will throw this if it decides
 			// the content is not text
 		}
-		for(Iterator it  = mimeDetectors.values().iterator();it.hasNext();) {
+		for (MimeDetector md : mimeDetectors.values()) {
 			try {
-				MimeDetector md = (MimeDetector)it.next();
 				mimeTypes.addAll(md.getMimeTypes(fileName));
 			}catch(UnsupportedOperationException usoe) {
 				// We ignore this as it indicates that this MimeDetector does not support
@@ -1017,9 +1005,9 @@ class MimeDetectorRegistry {
 		return mimeTypes;
 	}
 
-	Collection getMimeTypes(final File file) throws MimeException
+	Collection<MimeType> getMimeTypes(final File file) throws MimeException
 	{
-		Collection mimeTypes = new ArrayList();
+		Collection<MimeType> mimeTypes = new ArrayList<>();
 		try {
 			if(!EncodingGuesser.getSupportedEncodings().isEmpty()) {
 				mimeTypes = TextMimeDetector.getMimeTypes(file);
@@ -1028,9 +1016,8 @@ class MimeDetectorRegistry {
 			// The TextMimeDetector will throw this if it decides
 			// the content is not text
 		}
-		for(Iterator it  = mimeDetectors.values().iterator();it.hasNext();) {
+		for (MimeDetector md : mimeDetectors.values()) {
 			try {
-				MimeDetector md = (MimeDetector)it.next();
 				mimeTypes.addAll(md.getMimeTypes(file));
 			}catch(UnsupportedOperationException usoe) {
 				// We ignore this as it indicates that this MimeDetector does not support
@@ -1042,9 +1029,9 @@ class MimeDetectorRegistry {
 		return mimeTypes;
 	}
 
-	Collection getMimeTypes(final InputStream in) throws MimeException
+	Collection<MimeType> getMimeTypes(final InputStream in) throws MimeException
 	{
-		Collection mimeTypes = new ArrayList();
+		Collection<MimeType> mimeTypes = new ArrayList<>();
 		try {
 			if(!EncodingGuesser.getSupportedEncodings().isEmpty()) {
 				mimeTypes = TextMimeDetector.getMimeTypes(in);
@@ -1053,9 +1040,8 @@ class MimeDetectorRegistry {
 			// The TextMimeDetector will throw this if it decides
 			// the content is not text
 		}
-		for(Iterator it  = mimeDetectors.values().iterator();it.hasNext();) {
+		for (MimeDetector md : mimeDetectors.values()) {
 			try {
-				MimeDetector md = (MimeDetector)it.next();
 				mimeTypes.addAll(md.getMimeTypes(in));
 			}catch(UnsupportedOperationException usoe) {
 				// We ignore this as it indicates that this MimeDetector does not support
@@ -1067,9 +1053,9 @@ class MimeDetectorRegistry {
 		return mimeTypes;
 	}
 
-	Collection getMimeTypes(final URL url) throws MimeException
+	Collection<MimeType> getMimeTypes(final URL url) throws MimeException
 	{
-		Collection mimeTypes = new ArrayList();
+		Collection<MimeType> mimeTypes = new ArrayList<>();
 		try {
 			if(!EncodingGuesser.getSupportedEncodings().isEmpty()) {
 				mimeTypes = TextMimeDetector.getMimeTypes(url);
@@ -1078,9 +1064,8 @@ class MimeDetectorRegistry {
 			// The TextMimeDetector will throw this if it decides
 			// the content is not text
 		}
-		for(Iterator it  = mimeDetectors.values().iterator();it.hasNext();) {
+		for (MimeDetector md : mimeDetectors.values()) {
 			try {
-				MimeDetector md = (MimeDetector)it.next();
 				mimeTypes.addAll(md.getMimeTypes(url));
 			}catch(UnsupportedOperationException usoe) {
 				// We ignore this as it indicates that this MimeDetector does not support

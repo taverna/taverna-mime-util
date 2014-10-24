@@ -33,7 +33,7 @@ import eu.medsea.mimeutil.MimeException;
  * @author Steven McArdle
  *
  */
-public class MimeType implements Comparable, Serializable {
+public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private static final long serialVersionUID = -1324243127744494894L;
 
@@ -109,6 +109,7 @@ public class MimeType implements Comparable, Serializable {
 	 * @return calculated hashCode
 	 * @see Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return (31 * mediaType.hashCode()) + subType.hashCode();
 	}
@@ -119,6 +120,7 @@ public class MimeType implements Comparable, Serializable {
 	 * @return true if the types match else false.
 	 * @see Object#equals(Object o)
 	 */
+	@Override
 	public boolean equals(Object o) {
 		if(o instanceof MimeType) {
 			if(this.mediaType.equals(((MimeType)o).mediaType) && this.subType.equals(((MimeType)o).subType)) {
@@ -135,6 +137,7 @@ public class MimeType implements Comparable, Serializable {
 	 * @return String representation i.e. <code>&lt;media type&gt;/&lt;sub type&gt;.
 	 * @see Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return mediaType + "/" + subType;
 	}
@@ -190,10 +193,8 @@ public class MimeType implements Comparable, Serializable {
 	/**
 	 * Allows us to use MimeType(s) in Sortable Set's such as the TreeSet.
 	 */
-	public int compareTo(Object arg0) {
-		if(arg0 instanceof MimeType) {
-			return toString().compareTo(((MimeType)arg0).toString());
-		}
-		return 0;
+	@Override
+	public int compareTo(MimeType arg0) {
+		return toString().compareTo(((MimeType)arg0).toString());
 	}
 }

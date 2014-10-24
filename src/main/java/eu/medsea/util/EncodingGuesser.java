@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeSet;
 
 import org.slf4j.Logger;
@@ -71,15 +70,13 @@ import org.slf4j.LoggerFactory;
  * </p>
  */
 public class EncodingGuesser {
-	private static final long serialVersionUID = -247389882161262839L;
-
 	private static Logger log = LoggerFactory.getLogger(EncodingGuesser.class);
 
 	// We want the CANONICAL name of the default Charset for the JVM.
 	private static String defaultJVMEncoding = Charset.forName(new java.io.OutputStreamWriter(new java.io.ByteArrayOutputStream()).getEncoding()).name();
-	private static Collection supportedEncodings = new TreeSet();
+	private static Collection<String> supportedEncodings = new TreeSet<>();
 
-	private static Map boms = new HashMap();
+	private static Map<String,byte[]> boms = new HashMap<>();
 
 	/**
 	 * Initialise the supported encodings to be those supported by the JVM.
@@ -123,9 +120,9 @@ public class EncodingGuesser {
 	 * @param data
 	 * @return the Collection of possible encodings from the supported encodings
 	 */
-	public static Collection getPossibleEncodings(byte [] data) {
+	public static Collection<String> getPossibleEncodings(byte [] data) {
 
-		Collection possibleEncodings = new TreeSet();
+		Collection<String> possibleEncodings = new TreeSet<>();
 		if(data == null || data.length == 0) {
 			return possibleEncodings;
 		}
@@ -135,7 +132,7 @@ public class EncodingGuesser {
 		// match any encodings anyway.
 
 		String encoding = null;
-		for(Iterator it = supportedEncodings.iterator(); it.hasNext();) {
+		for(Iterator<String> it = supportedEncodings.iterator(); it.hasNext();) {
 			// This will eliminate encodings it can't possibly be from the supported encodings
 			// by converting the source byte array to a String using each encoding in turn and
 			// then getting the resultant byte array and checking it against the passed in data.
@@ -228,8 +225,8 @@ public class EncodingGuesser {
 	 * @param encodings
 	 * @return a Collection containing all valid encodings contained in the passed in encodings array
 	 */
-	public static Collection getValidEncodings(String [] encodings) {
-		Collection c = new ArrayList();
+	public static Collection<String> getValidEncodings(String [] encodings) {
+		Collection<String> c = new ArrayList<>();
 		for(int i = 0; i < encodings.length; i++) {
 			if(supportedEncodings.contains(encodings[i])) {
 				c.add(encodings[i]);
@@ -251,7 +248,7 @@ public class EncodingGuesser {
 	 * Get the Collection of currently supported encodings
 	 * @return the supported encodings.
 	 */
-	public static Collection getSupportedEncodings() {
+	public static Collection<String> getSupportedEncodings() {
 		return supportedEncodings;
 	}
 
@@ -260,14 +257,14 @@ public class EncodingGuesser {
 	 * @param encodings. If this is null the supported encodings are left unchanged.
 	 * @return a copy of the currently supported encodings
 	 */
-	public static Collection setSupportedEncodings(Collection encodings) {
-		Collection current = new  TreeSet();
-		for(Iterator it = supportedEncodings.iterator(); it.hasNext();) {
+	public static Collection<String> setSupportedEncodings(Collection<String> encodings) {
+		Collection<String> current = new  TreeSet<>();
+		for(Iterator<String> it = supportedEncodings.iterator(); it.hasNext();) {
 			current.add(it.next());
 		}
 		if(encodings != null) {
 			supportedEncodings.clear();
-			for(Iterator it = encodings.iterator(); it.hasNext();) {
+			for(Iterator<String> it = encodings.iterator(); it.hasNext();) {
 				supportedEncodings.add(it.next());
 			}
 		}
@@ -338,13 +335,12 @@ public class EncodingGuesser {
 	 * at the time this is called.
 	 * @return current Collection of canonical encoding names
 	 */
-	public static Collection getCanonicalEncodingNamesSupportedByJVM() {
-		Collection encodings = new TreeSet();
+	public static Collection<String> getCanonicalEncodingNamesSupportedByJVM() {
+		Collection<String> encodings = new TreeSet<>();
 
-		SortedMap charSets =  Charset.availableCharsets();
-		Collection charSetNames = charSets.keySet();
-		for(Iterator it = charSetNames.iterator(); it.hasNext();) {
-			encodings.add((String)it.next());
+		Collection<String> charSetNames = Charset.availableCharsets().keySet();
+		for(Iterator<String> it = charSetNames.iterator(); it.hasNext();) {
+			encodings.add(it.next());
 		}
 		if(log.isDebugEnabled()) {
 			log.debug("The following [" + encodings.size() + "] encodings will be used: " + encodings);

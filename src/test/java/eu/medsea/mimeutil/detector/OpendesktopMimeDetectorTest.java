@@ -7,20 +7,31 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
-import org.junit.Ignore;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 
+import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil2;
 import eu.medsea.util.EncodingGuesser;
 
-@Ignore
 public class OpendesktopMimeDetectorTest extends TestCase {
 
 	MimeUtil2 mimeUtil = new MimeUtil2();
 
+	@BeforeClass
+	public static void checkPlatform() {
+		// Test doesn't work on Windows, so disable there
+		// http://stackoverflow.com/questions/1689242/conditionally-ignoring-tests-in-junit-4
+		// http://stackoverflow.com/questions/228477/how-do-i-programmatically-determine-operating-system-in-java
+		Assume.assumeFalse(System.getProperty("os.name").startsWith("Windows"));
+	}
+
+	@Override
 	public void setUp() {
 		mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.OpendesktopMimeDetector");
 	}
 
+	@Override
 	public void tearDown() {
 		mimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.OpendesktopMimeDetector");
 	}
@@ -72,7 +83,7 @@ public class OpendesktopMimeDetectorTest extends TestCase {
 		EncodingGuesser.setSupportedEncodings(EncodingGuesser.getCanonicalEncodingNamesSupportedByJVM());
 		assertContains("text/plain", mimeUtil.getMimeTypes(new File("src/test/resources/plaintext")));
 		// Clean out the encodings using an empty collection
-		EncodingGuesser.setSupportedEncodings(new ArrayList());
+		EncodingGuesser.setSupportedEncodings(new ArrayList<String>());
 
 
 	}
@@ -101,7 +112,21 @@ public class OpendesktopMimeDetectorTest extends TestCase {
 	 * @param expected
 	 * @param collection
 	 */
-	public static void assertContains(Object expected, Collection collection) {
+	static void assertContains(String expected, Collection<MimeType> collection) {
+		assertTrue("Did not contain " + expected + ", but: " + collection, collection
+				.contains(new MimeType(expected)));
+	}
+
+	/**
+	 * Check if the expected object is in the collection
+	 * 
+	 * Needed as OpenDesktop mime descriptions might otherwise make these tests
+	 * fail on certain operating systems (such as Linux)
+	 * 
+	 * @param expected
+	 * @param collection
+	 */
+	static void assertContains(MimeType expected, Collection<MimeType> collection) {
 		assertTrue("Did not contain " + expected + ", but: " + collection, collection
 				.contains(expected));
 	}

@@ -59,11 +59,13 @@ public class WindowsRegistryMimeDetector extends MimeDetector {
 
 	private static final boolean isWindows = System.getProperty("os.name").startsWith("Windows");
 
+	@Override
 	public String getDescription() {
 		return "Get the MIME types of file extensions from the Windows Registry. Will be disabled on non-Windows machines.";
 	}
 
-	public Collection getMimeTypesFile(File file)
+	@Override
+	public Collection<MimeType> getMimeTypesFile(File file)
 			throws UnsupportedOperationException {
 		try {
 			return getMimeTypesURL(file.toURI().toURL());
@@ -72,17 +74,19 @@ public class WindowsRegistryMimeDetector extends MimeDetector {
 		}
 	}
 
-	public Collection getMimeTypesFileName(String fileName)
+	@Override
+	public Collection<MimeType> getMimeTypesFileName(String fileName)
 			throws UnsupportedOperationException {
 		return getMimeTypesFile(new File(fileName));
 	}
 
-	public Collection getMimeTypesURL(URL url)
+	@Override
+	public Collection<MimeType> getMimeTypesURL(URL url)
 			throws UnsupportedOperationException {
 		if(!isWindows) {
 			throw new UnsupportedOperationException("WindowsRegistryMimeDetector only supported on Windows platform.");
 		}
-		Collection mimeTypes = new ArrayList();
+		Collection<MimeType> mimeTypes = new ArrayList<>();
 
 		String contentType = getContentType(MimeUtil.getExtension(url.getPath()));
 		if(contentType != null && contentType.length() > 0) {
@@ -94,7 +98,8 @@ public class WindowsRegistryMimeDetector extends MimeDetector {
 	/**
 	 * Content detection not supported
 	 */
-	public Collection getMimeTypesByteArray(byte[] data)
+	@Override
+	public Collection<MimeType> getMimeTypesByteArray(byte[] data)
 			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException(
 				"WindowsRegistryMimeDetector does not support detection from byte arrays.");
@@ -103,7 +108,8 @@ public class WindowsRegistryMimeDetector extends MimeDetector {
 	/**
 	 * Content detection not supported
 	 */
-	public Collection getMimeTypesInputStream(InputStream in)
+	@Override
+	public Collection<MimeType> getMimeTypesInputStream(InputStream in)
 			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException(
 				"WindowsRegistryMimeDetector does not support detection from InputStreams.");
@@ -144,6 +150,7 @@ public class WindowsRegistryMimeDetector extends MimeDetector {
 			sw = new StringWriter();
 		}
 
+		@Override
 		public void run() {
 			try {
 				int c;

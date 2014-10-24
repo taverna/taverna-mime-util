@@ -29,11 +29,11 @@ class InvalidMagicMimeEntryException extends RuntimeException {
         super("Invalid Magic Mime Entry: Unknown entry");
     }
 
-    public InvalidMagicMimeEntryException(List mimeMagicEntry) {
+    public InvalidMagicMimeEntryException(List<?> mimeMagicEntry) {
     	super("Invalid Magic Mime Entry: " + mimeMagicEntry.toString());
     }
 
-    public InvalidMagicMimeEntryException(List mimeMagicEntry, Throwable t) {
+    public InvalidMagicMimeEntryException(List<?> mimeMagicEntry, Throwable t) {
     	super("Invalid Magic Mime Entry: " + mimeMagicEntry.toString(), t);
     }
 

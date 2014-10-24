@@ -96,11 +96,8 @@ public class OpendesktopMimeDetector extends MimeDetector {
 
 		}
 		// Map the mime.cache file as a memory mapped file
-		FileChannel rCh = null;
-		try {
-			RandomAccessFile raf = null;
-			raf = new RandomAccessFile(cacheFile,"r");
-			rCh = (raf).getChannel();
+		try (RandomAccessFile raf = new RandomAccessFile(cacheFile, "r");
+				FileChannel rCh = raf.getChannel()) {
 			content = rCh.map(FileChannel.MapMode.READ_ONLY, 0, rCh.size());
 
 			// Read all of the MIME type from the Alias list
@@ -110,7 +107,8 @@ public class OpendesktopMimeDetector extends MimeDetector {
 				log.debug("Registering a FileWatcher for [" + cacheFile + "]");
 			}
 			TimerTask task = new FileWatcher(new File(cacheFile)) {
-			      protected void onChange( File file ) {
+			      @Override
+				protected void onChange( File file ) {
 			          initMimeTypes();
 			        }
 			      };
@@ -121,22 +119,16 @@ public class OpendesktopMimeDetector extends MimeDetector {
 
 		}catch(Exception e) {
 			throw new MimeException(e);
-		}finally {
-			if(rCh != null) {
-				try {
-			    rCh.close();
-				}catch(Exception e) {
-					log.error(e.getLocalizedMessage(), e);
-				}
-			}
 		}
 	}
 
+	@Override
 	public void delete() {
 		// Cancel this timer
 		timer.cancel();
 	}
 
+	@Override
 	public String getDescription() {
 		return "Resolve mime types for files and streams using the Opendesktop shared mime.cache file. Version [" + getMajorVersion() + "." + getMinorVersion() + "].";
 	}
@@ -149,13 +141,14 @@ public class OpendesktopMimeDetector extends MimeDetector {
 	 * http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
 	 * See the Recommended checking order.
 	 */
-	public Collection getMimeTypesFileName(String fileName) {
-		Collection mimeTypes = new ArrayList();
+	@Override
+	public Collection<MimeType> getMimeTypesFileName(String fileName) {
+		List<MimeType> mimeTypes = new ArrayList<>();
 		// Lookup the globbing methods first
 		lookupMimeTypesForGlobFileName(fileName, mimeTypes);
 
 		if(!mimeTypes.isEmpty()) {
-			mimeTypes = normalizeWeightedMimeList((List)mimeTypes);
+			mimeTypes = normalizeWeightedMimeList(mimeTypes);
 		}
 
 		return mimeTypes;
@@ -167,9 +160,10 @@ public class OpendesktopMimeDetector extends MimeDetector {
 	 * http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
 	 * See the Recommended checking order.
 	 */
-	public Collection getMimeTypesURL(URL url) {
+	@Override
+	public Collection<MimeType> getMimeTypesURL(URL url) {
 
-		Collection mimeTypes = getMimeTypesFileName(url.getPath());
+		Collection<MimeType> mimeTypes = getMimeTypesFileName(url.getPath());
 		return _getMimeTypes(mimeTypes, getInputStream(url));
 	}
 
@@ -179,10 +173,11 @@ public class OpendesktopMimeDetector extends MimeDetector {
 	 * http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
 	 * See the Recommended checking order.
 	 */
-	public Collection getMimeTypesFile(File file)
+	@Override
+	public Collection<MimeType> getMimeTypesFile(File file)
 			throws UnsupportedOperationException {
 
-		Collection mimeTypes = getMimeTypesFileName(file.getName());
+		Collection<MimeType> mimeTypes = getMimeTypesFileName(file.getName());
 		if(!file.exists()) {
 			return mimeTypes;
 		}
@@ -195,7 +190,8 @@ public class OpendesktopMimeDetector extends MimeDetector {
 	 * defined in the shared mime database spec
 	 * http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
 	 */
-	public Collection getMimeTypesInputStream(InputStream in)
+	@Override
+	public Collection<MimeType> getMimeTypesInputStream(InputStream in)
 			throws UnsupportedOperationException {
 		return lookupMimeTypesForMagicData(in);
 	}
@@ -206,7 +202,8 @@ public class OpendesktopMimeDetector extends MimeDetector {
 	 * defined in the shared mime database spec
 	 * http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
 	 */
-	public Collection getMimeTypesByteArray(byte[] data)
+	@Override
+	public Collection<MimeType> getMimeTypesByteArray(byte[] data)
 			throws UnsupportedOperationException {
 		return lookupMagicData(data);
 	}
@@ -225,7 +222,7 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		" GENERIC_ICONS_LIST_OFFSET=" + getGenericIconListOffset() + "}";
 	}
 
-	private Collection lookupMimeTypesForMagicData(InputStream in) {
+	private Collection<MimeType> lookupMimeTypesForMagicData(InputStream in) {
 
 		int offset = 0;
 		int len = getMaxExtents();
@@ -261,9 +258,9 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		return lookupMagicData(data);
 	}
 
-	private Collection lookupMagicData(byte [] data) {
+	private Collection<MimeType> lookupMagicData(byte [] data) {
 
-		Collection mimeTypes = new ArrayList();
+		Collection<MimeType> mimeTypes = new ArrayList<>();
 
 		int listOffset = getMagicListOffset();
 		int numEntries = content.getInt(listOffset);
@@ -272,7 +269,7 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		for(int i = 0; i < numEntries; i++) {
 			String mimeType = compareToMagicData(offset + (16 * i), data);
 			if(mimeType != null) {
-				mimeTypes.add(mimeType);
+				mimeTypes.add(new MimeType(mimeType));
 			} else {
 				String nonMatch = getMimeType(content.getInt(offset + (16 * i) + 4));
 				mimeTypes.remove(nonMatch);
@@ -333,7 +330,7 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		return false;
 	}
 
-	private void lookupGlobLiteral(String fileName, Collection mimeTypes) {
+	private void lookupGlobLiteral(String fileName, Collection<MimeType> mimeTypes) {
 		int listOffset = getLiteralListOffset();
 		int numEntries = content.getInt(listOffset);
 
@@ -356,7 +353,7 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		}
 	}
 
-	private void lookupGlobFileNameMatch(String fileName, Collection mimeTypes) {
+	private void lookupGlobFileNameMatch(String fileName, Collection<MimeType> mimeTypes) {
 		int listOffset = getGlobListOffset();
 		int numEntries = content.getInt(listOffset);
 
@@ -374,12 +371,13 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		}
 	}
 
-	private Collection normalizeWeightedMimeList(Collection weightedMimeTypes) {
-		Collection mimeTypes = new LinkedHashSet();
+	private List<MimeType> normalizeWeightedMimeList(List<MimeType> weightedMimeTypes) {
+		Collection<MimeType> mimeTypes = new LinkedHashSet<>();
 
 		// Sort the weightedMimeTypes
-		Collections.sort((List)weightedMimeTypes, new Comparator() {
-			public int compare(Object obj1, Object obj2) {
+		Collections.sort(weightedMimeTypes, new Comparator<MimeType>() {
+			@Override
+			public int compare(MimeType obj1, MimeType obj2) {
 				return ((WeightedMimeType)obj1).weight - ((WeightedMimeType)obj2).weight;
 			}
 		});
@@ -387,7 +385,7 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		// Keep only globs with the biggest weight. They are in weight order at this point
 		int weight = 0;
 		int patternLen = 0;
-		for(Iterator it = weightedMimeTypes.iterator(); it.hasNext();) {
+		for(Iterator<MimeType> it = weightedMimeTypes.iterator(); it.hasNext();) {
 			WeightedMimeType mw = (WeightedMimeType)it.next();
 			if(weight < mw.weight){
 				weight = mw.weight;
@@ -401,7 +399,7 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		}
 
 		// Now keep only the longest patterns
-		for(Iterator it = weightedMimeTypes.iterator(); it.hasNext();) {
+		for(Iterator<MimeType> it = weightedMimeTypes.iterator(); it.hasNext();) {
 			WeightedMimeType mw = (WeightedMimeType)it.next();
 			if(mw.pattern.length() < patternLen) {
 				mimeTypes.remove(mw);
@@ -412,14 +410,10 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		// pattern length. Can even have multiple entries for the same type so lets remove
 		// any duplicates by copying entries to a HashSet that can only have a single instance
 		// of each type
-		Collection _mimeTypes = new HashSet();
-		for(Iterator it = mimeTypes.iterator(); it.hasNext();) {
-			_mimeTypes.add(((WeightedMimeType)it.next()).toString());
-		}
-		return _mimeTypes;
+		return new ArrayList<>(new HashSet<>(mimeTypes));
 	}
 
-	private void lookupMimeTypesForGlobFileName(String fileName, Collection mimeTypes) {
+	private void lookupMimeTypesForGlobFileName(String fileName, Collection<MimeType> mimeTypes) {
 		if(fileName == null) {
 			return;
 		}
@@ -440,7 +434,7 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		}
 	}
 
-	private void lookupGlobSuffix(String fileName, boolean ignoreCase, int len, Collection mimeTypes) {
+	private void lookupGlobSuffix(String fileName, boolean ignoreCase, int len, Collection<MimeType> mimeTypes) {
 
 		int listOffset = getReverseSuffixTreeOffset();
 		int numEntries = content.getInt(listOffset);
@@ -449,7 +443,7 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		lookupGlobNodeSuffix(fileName, numEntries, offset, ignoreCase, len, mimeTypes, new StringBuffer());
 	}
 
-	private void lookupGlobNodeSuffix(String fileName, int numEntries, int offset, boolean ignoreCase, int len, Collection mimeTypes, StringBuffer pattern) {
+	private void lookupGlobNodeSuffix(String fileName, int numEntries, int offset, boolean ignoreCase, int len, Collection<MimeType> mimeTypes, StringBuffer pattern) {
 		char character = ignoreCase
 		? fileName.toLowerCase().charAt(len - 1)
 		: fileName.charAt(len - 1);
@@ -684,28 +678,26 @@ public class OpendesktopMimeDetector extends MimeDetector {
 		}
 	}
 
-	private Collection _getMimeTypes(Collection mimeTypes, InputStream in) {
+	private Collection<MimeType> _getMimeTypes(Collection<MimeType> mimeTypes, InputStream in) {
 
 		if(mimeTypes.isEmpty() || mimeTypes.size() > 1) {
 			try {
-				Collection _mimeTypes = getMimeTypesInputStream(in = new BufferedInputStream(in));
+				Collection<MimeType> _mimeTypes = getMimeTypesInputStream(new BufferedInputStream(in));
 
 				if(!_mimeTypes.isEmpty()) {
 					if(!mimeTypes.isEmpty()) {
 						// more than one glob matched
 
 						// Check for same mime type
-						for(Iterator it = mimeTypes.iterator(); it.hasNext();) {
-							String mimeType = (String)it.next();
+						for (MimeType mimeType : mimeTypes) {
 							if(_mimeTypes.contains(mimeType)) {
 								// mimeTypes = new ArrayList();
 								mimeTypes.add(mimeType);
 								// return mimeTypes;
 							}
 							// Check for mime type subtype
-							for(Iterator _it = _mimeTypes.iterator(); _it.hasNext();) {
-								String _mimeType = (String)_it.next();
-								if(isMimeTypeSubclass(mimeType, _mimeType)) {
+							for (MimeType _mimeType : _mimeTypes) {
+								if(isMimeTypeSubclass(mimeType.toString(), _mimeType.toString())) {
 									// mimeTypes = new ArrayList();
 									mimeTypes.add(mimeType);
 									// return mimeTypes;
@@ -750,7 +742,8 @@ abstract class FileWatcher extends TimerTask {
 	    this.timeStamp = file.lastModified();
 	  }
 
-	  public final void run() {
+	  @Override
+	public final void run() {
 	    long timeStamp = file.lastModified();
 	    // Only do this if the file timestamp has changed
 	    if( this.timeStamp != timeStamp ) {

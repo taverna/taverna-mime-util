@@ -15,8 +15,6 @@
  */
 package eu.medsea.mimeutil.detector;
 
-import java.util.Iterator;
-
 import eu.medsea.mimeutil.MimeType;
 
 
@@ -53,8 +51,7 @@ class MatchingMagicMimeEntry
 	{
 		++subLevel;
 		int result = 0;
-		for (Iterator it = entry.getSubEntries().iterator(); it.hasNext();) {
-			MagicMimeEntry subEntry = (MagicMimeEntry) it.next();
+		for (MagicMimeEntry subEntry : entry.getSubEntries()) {
 			result += subLevel * (1 + getRecursiveSubEntryCount(subEntry, subLevel));
 		}
 		return result;
@@ -76,6 +73,7 @@ class MatchingMagicMimeEntry
 		return new MimeType(magicMimeEntry.getMimeType());
 	}
 
+	@Override
 	public String toString() {
 		return this.getClass().getName() + '[' + getMimeType() + ',' + getSpecificity() + ']';
 	}

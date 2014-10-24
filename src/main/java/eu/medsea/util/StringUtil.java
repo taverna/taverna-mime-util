@@ -16,8 +16,7 @@
 package eu.medsea.util;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * A string utility class with various string manipulation functions
@@ -60,7 +59,7 @@ public class StringUtil {
 	}
 
 	public static String toStringArrayToString(String [] array) {
-		Collection c = new Vector();
+		ArrayList<String> c = new ArrayList<>();
 		for(int i =0; i < array.length; i++) {
 			c.add(array[i]);
 		}

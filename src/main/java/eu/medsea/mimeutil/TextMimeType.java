@@ -77,6 +77,7 @@ public class TextMimeType extends MimeType {
 		this.encoding = encoding;
 	}
 
+	@Override
 	public String toString() {
 		return super.toString() + ";charset=" + getEncoding();
 	}

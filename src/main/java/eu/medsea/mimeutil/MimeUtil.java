@@ -248,7 +248,7 @@ public class MimeUtil {
 	 * @return all matching MimeType(s)
 	 * @throws MimeException
 	 */
-	public static final Collection getMimeTypes(final byte [] data) throws MimeException {
+	public static final Collection<MimeType> getMimeTypes(final byte [] data) throws MimeException {
 		return mimeUtil.getMimeTypes(data);
 	}
 
@@ -261,7 +261,7 @@ public class MimeUtil {
 	 * @return all matching MimeType(s)
 	 * @throws MimeException
 	 */
-	public static final Collection getMimeTypes(final byte [] data, final MimeType unknownMimeType) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final byte [] data, final MimeType unknownMimeType) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(data, unknownMimeType);
 	}
@@ -276,7 +276,7 @@ public class MimeUtil {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public static final Collection getMimeTypes(final File file) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final File file) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(file);
 	}
@@ -293,7 +293,7 @@ public class MimeUtil {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public static final Collection getMimeTypes(final File file, final MimeType unknownMimeType) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final File file, final MimeType unknownMimeType) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(file, unknownMimeType);
 	}
@@ -308,7 +308,7 @@ public class MimeUtil {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public static final Collection getMimeTypes(final InputStream in) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final InputStream in) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(in);
 	}
@@ -325,7 +325,7 @@ public class MimeUtil {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public static final Collection getMimeTypes(final InputStream in, final MimeType unknownMimeType) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final InputStream in, final MimeType unknownMimeType) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(in, unknownMimeType);
 	}
@@ -340,7 +340,7 @@ public class MimeUtil {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public static final Collection getMimeTypes(final String fileName) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final String fileName) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(fileName);
 	}
@@ -357,7 +357,7 @@ public class MimeUtil {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public static final Collection getMimeTypes(final String fileName, final MimeType unknownMimeType) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final String fileName, final MimeType unknownMimeType) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(fileName, unknownMimeType);
 	}
@@ -372,12 +372,12 @@ public class MimeUtil {
 	 * @throws MimeException if there are problems such as reading files generated when the MimeHandler(s)
 	 * executed.
 	 */
-	public static final Collection getMimeTypes(final URL url) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final URL url) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(url);
 	}
 
-	public static final Collection getMimeTypes(final URL url, final MimeType unknownMimeType) throws MimeException
+	public static final Collection<MimeType> getMimeTypes(final URL url, final MimeType unknownMimeType) throws MimeException
 	{
 		return mimeUtil.getMimeTypes(url, unknownMimeType);
 	}
@@ -446,7 +446,7 @@ public class MimeUtil {
 	 * @return the most specific MimeType. If more than one of the mime types in the Collection
 	 * have the same value then the first one found with this value in the Collection is returned.
 	 */
-	public static MimeType getMostSpecificMimeType(final Collection mimeTypes) {
+	public static MimeType getMostSpecificMimeType(final Collection<MimeType> mimeTypes) {
 		return MimeUtil2.getMostSpecificMimeType(mimeTypes);
 	}
 

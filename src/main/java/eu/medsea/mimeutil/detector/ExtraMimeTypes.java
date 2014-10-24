@@ -33,10 +33,11 @@ public class ExtraMimeTypes extends MagicMimeMimeDetector {
 			mimeTempFile = File.createTempFile("mime-types", null);
 			OutputStream outputStream = new FileOutputStream(mimeTempFile);
 			IOUtils.copy(resourceAsStream, outputStream);
+			return mimeTempFile.getAbsolutePath();
 		} catch (IOException e) {
-
+			// Should be unreachable
+			return null;
 		}
-		return mimeTempFile.getAbsolutePath();
 	}
 
 }

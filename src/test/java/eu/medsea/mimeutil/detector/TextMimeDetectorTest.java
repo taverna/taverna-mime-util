@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 import org.junit.Ignore;
@@ -22,6 +23,7 @@ import eu.medsea.util.EncodingGuesser;
 import junit.framework.TestCase;
 
 public class TextMimeDetectorTest extends TestCase {
+	static MimeType textPlain = new MimeType("text/plain");
 
 	static {
 		// We can never register or unregister the TextMimeDetector. This is coded in and will
@@ -36,13 +38,15 @@ public class TextMimeDetectorTest extends TestCase {
 
 	MimeUtil2 mimeUtil = new MimeUtil2();
 
+	@Override
 	public void setUp() {
 		// We will initialise the encodings with all those supported by the JVM
 		EncodingGuesser.setSupportedEncodings(EncodingGuesser.getCanonicalEncodingNamesSupportedByJVM());
 	}
 
+	@Override
 	public void tearDown() {
-		EncodingGuesser.setSupportedEncodings(new ArrayList());
+		EncodingGuesser.setSupportedEncodings(new ArrayList<String>());
 	}
 
 	// We don't register any MimeDetector(s) so the default TextMimeDetector will be used
@@ -51,49 +55,49 @@ public class TextMimeDetectorTest extends TestCase {
 	public void testGetMimeTypesFile() {
 		
 		// TODO: Update test to not use File() directly
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/a.html")).contains("text/plain"));
-//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/b-jpg.img")).contains("text/plain"));
-//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/b.jpg")).contains("text/plain"));
-//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/c-gif.img")).contains("text/plain"));
-//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/c.gif")).contains("text/plain"));
-//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/d-png.img")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e-svg.img")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e.svg")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e.xml")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e[xml]")).contains("text/plain"));
-//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/f.tar.gz")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/log4j.properties")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/magic.mime")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/mime-types.properties")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/plaintext")).contains("text/plain"));
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/plaintext.txt")).contains("text/plain"));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/a.html")).contains(textPlain));
+//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/b-jpg.img")).contains(textPlain));
+//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/b.jpg")).contains(textPlain));
+//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/c-gif.img")).contains(textPlain));
+//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/c.gif")).contains(textPlain));
+//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/d-png.img")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e-svg.img")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e.svg")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e.xml")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e[xml]")).contains(textPlain));
+//		assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/f.tar.gz")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/log4j.properties")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/magic.mime")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/mime-types.properties")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/plaintext")).contains(textPlain));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/plaintext.txt")).contains(textPlain));
 //
 //		// Even though this is a binary file, due to it's small size (5 bytes) it has matched with a small number of encodings
 //		// and is therefore considered to be a text file. This is a small risk with small binary files.
-//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/test.bin")).contains("text/plain"));
+//		assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/test.bin")).contains(textPlain));
 	}
 
 /*	public void testGetMimeTypesString() {
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/a.html").contains("text/plain"));
-		assertFalse(mimeUtil.getMimeTypes("src/test/resources/b-jpg.img").contains("text/plain"));
-		assertFalse(mimeUtil.getMimeTypes("src/test/resources/b.jpg").contains("text/plain"));
-		assertFalse(mimeUtil.getMimeTypes("src/test/resources/c-gif.img").contains("text/plain"));
-		assertFalse(mimeUtil.getMimeTypes("src/test/resources/c.gif").contains("text/plain"));
-		assertFalse(mimeUtil.getMimeTypes("src/test/resources/d-png.img").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/e-svg.img").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/e.svg").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/e.xml").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/e[xml]").contains("text/plain"));
-		assertFalse(mimeUtil.getMimeTypes("src/test/resources/f.tar.gz").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/log4j.properties").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/magic.mime").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/mime-types.properties").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/plaintext").contains("text/plain"));
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/plaintext.txt").contains("text/plain"));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/a.html").contains(textPlain));
+		assertFalse(mimeUtil.getMimeTypes("src/test/resources/b-jpg.img").contains(textPlain));
+		assertFalse(mimeUtil.getMimeTypes("src/test/resources/b.jpg").contains(textPlain));
+		assertFalse(mimeUtil.getMimeTypes("src/test/resources/c-gif.img").contains(textPlain));
+		assertFalse(mimeUtil.getMimeTypes("src/test/resources/c.gif").contains(textPlain));
+		assertFalse(mimeUtil.getMimeTypes("src/test/resources/d-png.img").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/e-svg.img").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/e.svg").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/e.xml").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/e[xml]").contains(textPlain));
+		assertFalse(mimeUtil.getMimeTypes("src/test/resources/f.tar.gz").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/log4j.properties").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/magic.mime").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/mime-types.properties").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/plaintext").contains(textPlain));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/plaintext.txt").contains(textPlain));
 
 		// Even though this is a binary file, due to it's small size (5 bytes) it has matched with a small number of encodings
 		// and is therefore considered to be a text file. This is a small risk with small binary files.
-		assertTrue(mimeUtil.getMimeTypes("src/test/resources/test.bin").contains("text/plain"));
+		assertTrue(mimeUtil.getMimeTypes("src/test/resources/test.bin").contains(textPlain));
 
 	}*/
 
@@ -101,37 +105,37 @@ public class TextMimeDetectorTest extends TestCase {
 		try {
 			mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
 
-			assertTrue(mimeUtil.getMimeTypes("src/test/resources/a.html").contains("text/plain"));
+			assertTrue(mimeUtil.getMimeTypes("src/test/resources/a.html").contains(textPlain));
 
-			assertFalse(mimeUtil.getMimeTypes("src/test/resources/b-jpg.img").contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes("src/test/resources/b.jpg").contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes("src/test/resources/c-gif.img").contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes("src/test/resources/c.gif").contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes("src/test/resources/d-png.img").contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes("src/test/resources/d.png").contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes("src/test/resources/f.tar.gz").contains("text/plain"));
+			assertFalse(mimeUtil.getMimeTypes("src/test/resources/b-jpg.img").contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes("src/test/resources/b.jpg").contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes("src/test/resources/c-gif.img").contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes("src/test/resources/c.gif").contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes("src/test/resources/d-png.img").contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes("src/test/resources/d.png").contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes("src/test/resources/f.tar.gz").contains(textPlain));
 
-//			assertTrue(mimeUtil.getMimeTypes("src/test/resources/e-svg.img").contains("text/plain"));
-//			assertTrue(mimeUtil.getMimeTypes("src/test/resources/e.svg").contains("text/plain"));
-//			assertTrue(mimeUtil.getMimeTypes("src/test/resources/e.xml").contains("text/plain"));
-//			assertTrue(mimeUtil.getMimeTypes("src/test/resources/e[xml]").contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes("src/test/resources/log4j.properties").contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes("src/test/resources/magic.mime").contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes("src/test/resources/mime-types.properties").contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes("src/test/resources/plaintext").contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes("src/test/resources/plaintext.txt").contains("text/plain"));
+//			assertTrue(mimeUtil.getMimeTypes("src/test/resources/e-svg.img").contains(textPlain));
+//			assertTrue(mimeUtil.getMimeTypes("src/test/resources/e.svg").contains(textPlain));
+//			assertTrue(mimeUtil.getMimeTypes("src/test/resources/e.xml").contains(textPlain));
+//			assertTrue(mimeUtil.getMimeTypes("src/test/resources/e[xml]").contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes("src/test/resources/log4j.properties").contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes("src/test/resources/magic.mime").contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes("src/test/resources/mime-types.properties").contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes("src/test/resources/plaintext").contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes("src/test/resources/plaintext.txt").contains(textPlain));
 
 			// Even though this is a binary file, due to it's small size (5 bytes) it has matched with a small number of encodings
 			// and is therefore considered to be a text file. This is a small risk with small binary files.
-			assertTrue(mimeUtil.getMimeTypes("src/test/resources/test.bin").contains("text/plain"));
+			assertTrue(mimeUtil.getMimeTypes("src/test/resources/test.bin").contains(textPlain));
 
 
 			// As the ExtensionMimeDetector should also returned a text/plain MimeType for an extension of .txt
 			// lets make sure the specificity has been updated and its still a TextMimeType
-			Collection mimeTypes = mimeUtil.getMimeTypes("src/test/resources/plaintext.txt");
-			assertTrue(mimeTypes.contains("text/plain"));
-			Collection retain = new HashSet();
-			retain.add("text/plain");
+			Collection<MimeType> mimeTypes = mimeUtil.getMimeTypes("src/test/resources/plaintext.txt");
+			assertTrue(mimeTypes.contains(textPlain));
+			Collection<MimeType> retain = new HashSet<>();
+			retain.add(textPlain);
 			mimeTypes.retainAll(retain);
 			MimeType mimeType = (MimeType)mimeTypes.iterator().next();
 			assertTrue(mimeType instanceof TextMimeType);
@@ -146,26 +150,26 @@ public class TextMimeDetectorTest extends TestCase {
 	public void testGetMimeTypesInputStream() {
 		try {
 
-			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/a.html").toURI().toURL().openStream()).contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/b-jpg.img").toURI().toURL().openStream()).contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/b.jpg").toURI().toURL().openStream()).contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/c-gif.img").toURI().toURL().openStream()).contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/c.gif").toURI().toURL().openStream()).contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/d-png.img").toURI().toURL().openStream()).contains("text/plain"));
-//			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e-svg.img").toURI().toURL().openStream()).contains("text/plain"));
-//			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e.svg").toURI().toURL().openStream()).contains("text/plain"));
-//			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e.xml").toURI().toURL().openStream()).contains("text/plain"));
-//			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e[xml]").toURI().toURL().openStream()).contains("text/plain"));
-			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/f.tar.gz").toURI().toURL().openStream()).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/log4j.properties").toURI().toURL().openStream()).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/magic.mime").toURI().toURL().openStream()).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/mime-types.properties").toURI().toURL().openStream()).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/plaintext").toURI().toURL().openStream()).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/plaintext.txt").toURI().toURL().openStream()).contains("text/plain"));
+			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/a.html").toURI().toURL().openStream()).contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/b-jpg.img").toURI().toURL().openStream()).contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/b.jpg").toURI().toURL().openStream()).contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/c-gif.img").toURI().toURL().openStream()).contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/c.gif").toURI().toURL().openStream()).contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/d-png.img").toURI().toURL().openStream()).contains(textPlain));
+//			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e-svg.img").toURI().toURL().openStream()).contains(textPlain));
+//			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e.svg").toURI().toURL().openStream()).contains(textPlain));
+//			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e.xml").toURI().toURL().openStream()).contains(textPlain));
+//			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/e[xml]").toURI().toURL().openStream()).contains(textPlain));
+			assertFalse(mimeUtil.getMimeTypes(new File("src/test/resources/f.tar.gz").toURI().toURL().openStream()).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/log4j.properties").toURI().toURL().openStream()).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/magic.mime").toURI().toURL().openStream()).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/mime-types.properties").toURI().toURL().openStream()).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/plaintext").toURI().toURL().openStream()).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/plaintext.txt").toURI().toURL().openStream()).contains(textPlain));
 
 			// Even though this is a binary file, due to it's small size (5 bytes) it has matched with a small number of encodings
 			// and is therefore considered to be a text file. This is a small risk with small binary files.
-			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/test.bin").toURI().toURL().openStream()).contains("text/plain"));
+			assertTrue(mimeUtil.getMimeTypes(new File("src/test/resources/test.bin").toURI().toURL().openStream()).contains(textPlain));
 		}catch(Exception e) {
 			fail("Should never get here");
 		}
@@ -174,13 +178,13 @@ public class TextMimeDetectorTest extends TestCase {
 	public void testGetMimeTypesInputStreamAndEnsureStreamIsReset() {
 		try {
 			InputStream in = (new File("src/test/resources/a.html").toURI().toURL()).openStream();
-			assertTrue(mimeUtil.getMimeTypes(in).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(in).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(in).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(in).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(in).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(in).contains("text/plain"));
-			assertTrue(mimeUtil.getMimeTypes(in).contains("text/plain"));
+			assertTrue(mimeUtil.getMimeTypes(in).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(in).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(in).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(in).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(in).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(in).contains(textPlain));
+			assertTrue(mimeUtil.getMimeTypes(in).contains(textPlain));
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			// Read some text from the stream so we can check that it's definitely been reset in the getMimeTypes() method
@@ -199,13 +203,13 @@ public class TextMimeDetectorTest extends TestCase {
 		// method so no further Handler(s) will fire
 		TextMimeDetector.registerTextMimeHandler(new NeverFireHandler());
 
-		Collection c = mimeUtil.getMimeTypes("src/test/resources/e.xml");
+		Collection<MimeType> c = mimeUtil.getMimeTypes("src/test/resources/e.xml");
 		assertTrue(c.size() == 1);
-		assertTrue(c.contains("text/xml"));
+		assertTrue(c.contains(new MimeType("text/xml")));
 
 		c = mimeUtil.getMimeTypes("src/test/resources/e.svg");
 		assertTrue(c.size() == 1);
-		assertTrue(c.contains("image/svg+xml"));
+		assertTrue(c.contains(new MimeType("image/svg+xml")));
 	}
 
 	/* We will add here new test for URL's that do not require an Internet connection
@@ -214,7 +218,7 @@ public class TextMimeDetectorTest extends TestCase {
 		try {
 			URL url = new URL("http://www.google.com/index.html");
 			Collection mimeTypes = MimeUtil.getMimeTypes(url);
-			assertTrue(mimeTypes.contains("text/plain"));
+			assertTrue(mimeTypes.contains(textPlain));
 
 		}catch(Exception e) {
 			fail("Should never get here");
@@ -225,6 +229,7 @@ public class TextMimeDetectorTest extends TestCase {
 
 	class XMLHandler implements TextMimeHandler {
 
+		@Override
 		public boolean handle(TextMimeType mimeType, String content) {
 			if(content.startsWith("<?xml")) {
 				mimeType.setMimeType(new MimeType("text/xml"));
@@ -242,6 +247,7 @@ public class TextMimeDetectorTest extends TestCase {
 	}
 
 	class SVGHandler implements TextMimeHandler {
+		@Override
 		public boolean handle(TextMimeType mimeType, String content) {
 			if(mimeType.equals(new MimeType("text/xml"))) {
 				if(content.contains("<svg  ")) {
@@ -254,6 +260,7 @@ public class TextMimeDetectorTest extends TestCase {
 	}
 
 	class NeverFireHandler implements TextMimeHandler {
+		@Override
 		public boolean handle(TextMimeType mimeType, String content) {
 			if("svg+xml".equals(mimeType.getSubType())) {
 				mimeType.setMediaType("very-funny");
@@ -265,13 +272,13 @@ public class TextMimeDetectorTest extends TestCase {
 	public void testUnicodeAndWestern() {
 		String[] encodings = {"UTF-8", "ISO-8859-1", "ISO-8859-15", "ASCII"};
 
-		Collection c_encodings = new ArrayList();
+		Collection<String> c_encodings = new ArrayList<>();
 		c_encodings.addAll(Arrays.asList(encodings));
 		EncodingGuesser.setSupportedEncodings(c_encodings);
 		TextMimeDetector.setPreferredEncodings(encodings);
 
-		assertEquals(MimeUtil.getMimeTypes(new File("src/test/resources/textfiles/western")), "text/plain;charset=ISO-8859-1");
-		assertEquals(MimeUtil.getMimeTypes(new File("src/test/resources/textfiles/unicode")), "text/plain;charset=UTF-8");
+		assertEquals(MimeUtil.getMimeTypes(new File("src/test/resources/textfiles/western")), Collections.singleton(new MimeType("text/plain;charset=ISO-8859-1")));
+		assertEquals(MimeUtil.getMimeTypes(new File("src/test/resources/textfiles/unicode")), Collections.singleton(new MimeType("text/plain;charset=UTF-8")));
 	}
 
 }

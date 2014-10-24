@@ -106,13 +106,13 @@ public final class TextMimeDetector extends MimeDetector {
 	// No text file should have 2 or more consecutive NULL values
 	private static final int MAX_NULL_VALUES = 2;
 
-	private static Collection preferredEncodings = new ArrayList();
+	private static Collection<String> preferredEncodings = new ArrayList<>();
 	static {
 		TextMimeDetector.setPreferredEncodings(new String [] {"UTF-16", "UTF-8", "ISO-8859-1", "windows-1252", "US-ASCII"} );
 	}
 
 	// Registered list of TextMimeHandler(s)
-	private static Collection handlers = new ArrayList();
+	private static Collection<TextMimeHandler> handlers = new ArrayList<>();
 
 	// Private so nobody can register one using the MimeUtil.registerMimeDetector(...) method
 	private TextMimeDetector() {
@@ -127,6 +127,7 @@ public final class TextMimeDetector extends MimeDetector {
 	/**
 	 * @see MimeDetector.getDescription()
 	 */
+	@Override
 	public String getDescription() {
 		return "Determine if a file or stream contains a text mime type. If so then return TextMimeType with text/plain and the best guess encoding.";
 	}
@@ -134,7 +135,8 @@ public final class TextMimeDetector extends MimeDetector {
 	/**
 	 * This MimeDetector requires content so defer to the file method
 	 */
-	public Collection getMimeTypesFileName(String fileName)
+	@Override
+	public Collection<MimeType> getMimeTypesFileName(String fileName)
 			throws UnsupportedOperationException {
 		return getMimeTypesFile(new File(fileName));
 	}
@@ -143,22 +145,16 @@ public final class TextMimeDetector extends MimeDetector {
 	 * We only want to deal with the stream from the URL
 	 * @see MimeDetector.getMimeTypesURL(URL url)
 	 */
-	public Collection getMimeTypesURL(URL url)
+	@Override
+	public Collection<MimeType> getMimeTypesURL(URL url)
 			throws UnsupportedOperationException {
 
-		InputStream in = null;
-		try {
-			return getMimeTypesInputStream(in = new BufferedInputStream(MimeUtil.getInputStreamForURL(url)));
+		try (InputStream in = new BufferedInputStream(MimeUtil.getInputStreamForURL(url))){
+			return getMimeTypesInputStream(in);
 		}catch(UnsupportedOperationException e) {
 			throw e;
 		}catch(Exception e) {
 			throw new MimeException(e);
-		}finally {
-			try {
-				in.close();
-			}catch(Exception ignore) {
-				log.error(ignore.getLocalizedMessage());
-			}
 		}
 	}
 
@@ -166,33 +162,27 @@ public final class TextMimeDetector extends MimeDetector {
 	 * We only want to deal with the stream for the file
 	 * @see MimeDetector.getMimeTypesURL(URL url)
 	 */
-	public Collection getMimeTypesFile(File file)
+	@Override
+	public Collection<MimeType> getMimeTypesFile(File file)
 			throws UnsupportedOperationException {
 
 		if(!file.exists()) {
 			throw new UnsupportedOperationException("This MimeDetector requires actual content.");
 		}
-		InputStream in = null;
-		try {
-			in = new BufferedInputStream(new FileInputStream(file));
+		try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
 			return getMimeTypesInputStream(in);
 		}catch(UnsupportedOperationException e) {
 			throw e;
 		}catch(Exception e) {
 			throw new MimeException(e);
-		}finally {
-			try {
-				in.close();
-			}catch(Exception ignore) {
-				log.error(ignore.getLocalizedMessage());
-			}
 		}
 	}
 
 	/**
 	 * @see MimeDetector.getMimeTypesInputStream(InputStream in)
 	 */
-	public Collection getMimeTypesInputStream(InputStream in)
+	@Override
+	public Collection<MimeType> getMimeTypesInputStream(InputStream in)
 			throws UnsupportedOperationException {
 
 		int offset = 0;
@@ -239,7 +229,8 @@ public final class TextMimeDetector extends MimeDetector {
 	/**
 	 * @see MimeDetector.getMimeTypesByteArray(byte [] data)
 	 */
-	public Collection getMimeTypesByteArray(byte[] data)
+	@Override
+	public Collection<MimeType> getMimeTypesByteArray(byte[] data)
 			throws UnsupportedOperationException {
 
 		// Check if the array contains binary data
@@ -247,9 +238,9 @@ public final class TextMimeDetector extends MimeDetector {
 			throw new UnsupportedOperationException();
 		}
 
-		Collection mimeTypes = new ArrayList();
+		Collection<MimeType> mimeTypes = new ArrayList<>();
 
-		Collection possibleEncodings = EncodingGuesser.getPossibleEncodings(data);
+		Collection<String> possibleEncodings = EncodingGuesser.getPossibleEncodings(data);
 		if(log.isDebugEnabled()) {
 			log.debug("Possible encodings [" + possibleEncodings.size() + "] " + possibleEncodings);
 		}
@@ -261,8 +252,8 @@ public final class TextMimeDetector extends MimeDetector {
 
 		String encoding = null;
 		// Iterate over the preferedEncodings array in the order defined and return the first one found
-		for(Iterator it = TextMimeDetector.preferredEncodings.iterator(); it.hasNext();) {
-			encoding = (String)it.next();
+		for(Iterator<String> it = TextMimeDetector.preferredEncodings.iterator(); it.hasNext();) {
+			encoding = it.next();
 			if(possibleEncodings.contains(encoding)) {
 				mimeTypes.add(new TextMimeType("text/plain", encoding));
 				break;
@@ -276,7 +267,7 @@ public final class TextMimeDetector extends MimeDetector {
 
 		// If none of our preferredEncodings or the default encoding are in the possible encodings list we return the first possibleEncoding;
 		if(mimeTypes.isEmpty()) {
-			Iterator it = possibleEncodings.iterator();
+			Iterator<String> it = possibleEncodings.iterator();
 			encoding = (String)it.next();
 			mimeTypes.add(new TextMimeType("text/plain", encoding));
 		}
@@ -337,7 +328,7 @@ public final class TextMimeDetector extends MimeDetector {
 	 * Get the current Collection of registered TexMimeHandler(s)
 	 * @return currently registered collection of TextMimeHandler(s)
 	 */
-	public static Collection getRegisteredTextMimeHandlers() {
+	public static Collection<TextMimeHandler> getRegisteredTextMimeHandlers() {
 		return handlers;
 	}
 
@@ -348,13 +339,12 @@ public final class TextMimeDetector extends MimeDetector {
 	 * @param content
 	 * @return
 	 */
-	private Collection fireMimeHandlers(Collection mimeTypes, String content) {
+	private Collection<MimeType> fireMimeHandlers(Collection<MimeType> mimeTypes, String content) {
 		// We only have one entry in the mimeTypes Collection due to the way
 		// this MimeDetector works.
 		TextMimeType mimeType = (TextMimeType)mimeTypes.iterator().next();
 
-		for(Iterator it = handlers.iterator(); it.hasNext(); ) {
-			TextMimeHandler tmh = (TextMimeHandler)it.next();
+		for (TextMimeHandler tmh : handlers) {
 			if(tmh.handle(mimeType, content)) {
 				// The first handler to return true will short circuit the rest of the handlers
 				break;

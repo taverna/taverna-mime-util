@@ -55,7 +55,7 @@ public class ZipJarUtil {
 	 * @throws ZipException
 	 * @throws IOException
 	 */
-	public static Collection getEntries(String fileName) throws ZipException, IOException {
+	public static Collection<String> getEntries(String fileName) throws ZipException, IOException {
 		return getEntries(new ZipFile(fileName));
 	}
 
@@ -70,7 +70,7 @@ public class ZipJarUtil {
 	 * @throws ZipException
 	 * @throws IOException
 	 */
-	public static Collection getEntries(File file) throws ZipException, IOException {
+	public static Collection<String> getEntries(File file) throws ZipException, IOException {
 		return getEntries(new ZipFile(file));
 	}
 
@@ -87,7 +87,7 @@ public class ZipJarUtil {
 	 * @throws ZipException
 	 * @throws IOException
 	 */
-	public static Collection getEntries(URL url) throws ZipException, IOException {
+	public static Collection<String> getEntries(URL url) throws ZipException, IOException {
 		JarURLConnection conn = (JarURLConnection)url.openConnection();
 		return getEntries(conn.getJarFile());
 	}
@@ -100,12 +100,12 @@ public class ZipJarUtil {
 	 * @throws ZipException
 	 * @throws IOException
 	 */
-	public static Collection getEntries(ZipFile zipFile) throws ZipException, IOException {
-		Collection entries = new ArrayList();
+	public static Collection<String> getEntries(ZipFile zipFile) throws ZipException, IOException {
+		Collection<String> entries = new ArrayList<>();
 
-		Enumeration e = zipFile.entries();
+		Enumeration<? extends ZipEntry> e = zipFile.entries();
 		while(e.hasMoreElements()) {
-			ZipEntry ze = (ZipEntry)e.nextElement();
+			ZipEntry ze = e.nextElement();
 			// We don't want directory entries
 			if(!ze.isDirectory()) {
 				entries.add(ze.getName());

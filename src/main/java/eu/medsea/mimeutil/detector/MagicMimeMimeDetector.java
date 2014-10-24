@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.medsea.mimeutil.MimeException;
+import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil;
 
 /**
@@ -148,15 +149,16 @@ public class MagicMimeMimeDetector extends MimeDetector {
 	// and add different paths or remove them all so that the internal file is always used
 	protected static String[] defaultLocations = { "/usr/share/mimelnk/magic",
 			"/usr/share/file/magic.mime", "/etc/magic.mime" };
-	protected static List magicMimeFileLocations = Arrays
+	protected static List<String> magicMimeFileLocations = Arrays
 			.asList(defaultLocations);
 
-	private static ArrayList mMagicMimeEntries = new ArrayList();
+	private static ArrayList<MagicMimeEntry> mMagicMimeEntries = new ArrayList<>();
 
 	public MagicMimeMimeDetector() {
 		MagicMimeMimeDetector.initMagicRules();
 	}
 
+	@Override
 	public String getDescription() {
 		return "Get the mime types of files or streams using the Unix file(5) magic.mime files";
 	}
@@ -168,13 +170,12 @@ public class MagicMimeMimeDetector extends MimeDetector {
 	 * @return the mime types.
 	 * @throws MimeException if for instance we try to match beyond the end of the data.
 	 */
-	public Collection getMimeTypesByteArray(final byte[] data)
+	@Override
+	public Collection<MimeType> getMimeTypesByteArray(final byte[] data)
 			throws UnsupportedOperationException {
-		Collection mimeTypes = new LinkedHashSet();
-		int len = mMagicMimeEntries.size();
+		Collection<MimeType> mimeTypes = new LinkedHashSet<>();
 		try {
-			for (int i = 0; i < len; i++) {
-				MagicMimeEntry me = (MagicMimeEntry) mMagicMimeEntries.get(i);
+			for (MagicMimeEntry me : mMagicMimeEntries) {
 				MagicMimeEntry matchingMagicMimeEntry = me.getMatch(data);
 				if (matchingMagicMimeEntry != null) {
 					mimeTypes.add(matchingMagicMimeEntry.getMimeType());
@@ -200,13 +201,12 @@ public class MagicMimeMimeDetector extends MimeDetector {
 	 *             if the specified <code>InputStream</code> does not support
 	 *             mark and reset (see {@link InputStream#markSupported()}).
 	 */
-	public Collection getMimeTypesInputStream(final InputStream in)
+	@Override
+	public Collection<MimeType> getMimeTypesInputStream(final InputStream in)
 			throws UnsupportedOperationException {
-		Collection mimeTypes = new LinkedHashSet();
-		int len = mMagicMimeEntries.size();
+		Collection<MimeType> mimeTypes = new LinkedHashSet<>();
 		try {
-			for (int i = 0; i < len; i++) {
-				MagicMimeEntry me = (MagicMimeEntry) mMagicMimeEntries.get(i);
+			for (MagicMimeEntry me : mMagicMimeEntries) {
 				MagicMimeEntry matchingMagicMimeEntry = me.getMatch(in);
 				if (matchingMagicMimeEntry != null) {
 					mimeTypes.add(matchingMagicMimeEntry.getMimeType());
@@ -221,7 +221,8 @@ public class MagicMimeMimeDetector extends MimeDetector {
 	/**
 	 * Defer this call to the File method
 	 */
-	public Collection getMimeTypesFileName(final String fileName) throws UnsupportedOperationException {
+	@Override
+	public Collection<MimeType> getMimeTypesFileName(final String fileName) throws UnsupportedOperationException {
 		return getMimeTypesFile(new File(fileName));
 	}
 
@@ -229,30 +230,26 @@ public class MagicMimeMimeDetector extends MimeDetector {
 	/**
 	 * Defer this call to the InputStream method
 	 */
-	public Collection getMimeTypesURL(final URL url) throws UnsupportedOperationException {
-		InputStream in = null;
-		try {
-			return getMimeTypesInputStream(in = new BufferedInputStream(MimeUtil.getInputStreamForURL(url)));
+	@Override
+	public Collection<MimeType> getMimeTypesURL(final URL url) throws UnsupportedOperationException {
+		try (InputStream in  = new BufferedInputStream(MimeUtil.getInputStreamForURL(url))) {
+			return getMimeTypesInputStream(in);
 		}catch(Exception e) {
 			throw new MimeException(e);
-		}finally {
-			closeStream(in);
 		}
 	}
 
 	/**
 	 * Defer this call to the InputStream method
 	 */
-	public Collection getMimeTypesFile(final File file) throws UnsupportedOperationException {
-		InputStream in = null;
-		try {
-			return getMimeTypesInputStream(in = new BufferedInputStream(new FileInputStream(file)));
+	@Override
+	public Collection<MimeType> getMimeTypesFile(final File file) throws UnsupportedOperationException {
+		try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
+			return getMimeTypesInputStream(in);
 		}catch(FileNotFoundException e) {
 			throw new UnsupportedOperationException(e);
 		}catch(Exception e) {
 			throw new MimeException(e);
-		}finally {
-			closeStream(in);
 		}
 	}
 
@@ -268,21 +265,13 @@ public class MagicMimeMimeDetector extends MimeDetector {
 	 * to Simon Pepping for his bug report
 	 */
 	protected static void initMagicRules() {
-		InputStream in = null;
 
 		// Try to locate a magic.mime file locate by system property magic-mime
 		try {
 			String fname = System.getProperty("magic-mime");
 			if (fname != null && fname.length() != 0) {
-				in = new FileInputStream(fname);
-				try {
-					if (in != null) {
-						parse("-Dmagic-mime=" + fname,
-								new InputStreamReader(in));
-					}
-				} finally {
-					closeStream(in);
-					in = null;
+				try (InputStream in = new FileInputStream(fname)) {
+					parse("-Dmagic-mime=" + fname, new InputStreamReader(in));
 				}
 			}
 		} catch (Exception e) {
@@ -295,9 +284,9 @@ public class MagicMimeMimeDetector extends MimeDetector {
 
 		// Get an enumeration of all files on the classpath with this name. They could be in jar files as well
 		try {
-			Enumeration en = MimeUtil.class.getClassLoader().getResources("magic.mime");
+			Enumeration<URL> en = MimeUtil.class.getClassLoader().getResources("magic.mime");
 			while(en.hasMoreElements()) {
-				URL url = (URL)en.nextElement();
+				URL url = en.nextElement();
 				try {
 					parse("classpath:[" + url + "]", new InputStreamReader(url.openStream()));
 				}catch(Exception ex) {
@@ -317,14 +306,8 @@ public class MagicMimeMimeDetector extends MimeDetector {
 			File f = new File(System.getProperty("user.home") + File.separator
 					+ ".magic.mime");
 			if (f.exists()) {
-				in = new FileInputStream(f);
-				try {
-					if (in != null) {
-						parse(f.getAbsolutePath(), new InputStreamReader(in));
-					}
-				} finally {
-					closeStream(in);
-					in = null;
+				try (InputStream in = new FileInputStream(f)) {
+					parse(f.getAbsolutePath(), new InputStreamReader(in));
 				}
 			}
 		} catch (Exception e) {
@@ -348,15 +331,8 @@ public class MagicMimeMimeDetector extends MimeDetector {
 				}
 				File f = new File(name);
 				if (f.exists()) {
-					in = new FileInputStream(f);
-					try {
-						if (in != null) {
-							parse(f.getAbsolutePath(),
-									new InputStreamReader(in));
-						}
-					} finally {
-						closeStream(in);
-						in = null;
+					try (InputStream in = new FileInputStream(f)) {
+						parse(f.getAbsolutePath(), new InputStreamReader(in));
 					}
 				}
 			}
@@ -372,66 +348,42 @@ public class MagicMimeMimeDetector extends MimeDetector {
 		// if no entries were read from the OS.
 
 		int mMagicMimeEntriesSizeBeforeReadingOS = mMagicMimeEntries.size();
-		Iterator it = magicMimeFileLocations.iterator();
+		Iterator<String> it = magicMimeFileLocations.iterator();
 		while (it.hasNext()) {
-			parseMagicMimeFileLocation((String) it.next());
+			parseMagicMimeFileLocation(it.next());
 		}
 
 		if (mMagicMimeEntriesSizeBeforeReadingOS == mMagicMimeEntries.size()) {
 			// Use the magic.mime that we ship
 			try {
 				String resource = "eu/medsea/mimeutil/magic.mime";
-				in = MimeUtil.class.getClassLoader().getResourceAsStream(
-						resource);
-				parse("resource:" + resource, new InputStreamReader(in));
+				try (InputStream in = MimeUtil.class.getClassLoader()
+						.getResourceAsStream(resource)) {
+					parse("resource:" + resource, new InputStreamReader(in));
+				}
 			} catch (Exception e) {
 				log.error("Failed to process internal magic.mime file.", e);
-			} finally {
-				if (in != null) {
-					try {
-						in.close();
-					} catch (Exception e) {
-						// ignore, but log in debug mode
-						if (log.isDebugEnabled())
-							log.debug(e.getMessage(), e);
-					}
-					in = null;
-				}
 			}
 		}
 	}
 
 	private static void parseMagicMimeFileLocation(final String location) {
-		InputStream is = null;
-
-		List magicMimeFiles = getMagicFilesFromMagicMimeFileLocation(location);
-
-		for (Iterator itFile = magicMimeFiles.iterator(); itFile.hasNext();) {
-			File f = (File) itFile.next();
+		for (File f : getMagicFilesFromMagicMimeFileLocation(location)) {
 			try {
 				if (f.exists()) {
-					parse(f.getAbsolutePath(), new InputStreamReader(is = new FileInputStream(f)));
+					try (InputStream is = new FileInputStream(f)) {
+						parse(f.getAbsolutePath(), new InputStreamReader(is));
+					}
 				}
 			} catch (Exception e) {
 				log.warn(e.getMessage());
-			} finally {
-				if (is != null) {
-					try {
-						is.close();
-					} catch (Exception e) {
-						// ignore, but log in debug mode
-						if (log.isDebugEnabled())
-							log.debug(e.getMessage(), e);
-					}
-					is = null;
-				}
 			}
 		}
 	}
 
-	private static List getMagicFilesFromMagicMimeFileLocation(
+	private static List<File> getMagicFilesFromMagicMimeFileLocation(
 			final String magicMimeFileLocation) {
-		List magicMimeFiles = new LinkedList();
+		List<File> magicMimeFiles = new LinkedList<>();
 		if (magicMimeFileLocation.indexOf('*') < 0) {
 			magicMimeFiles.add(new File(magicMimeFileLocation));
 		} else {
@@ -455,7 +407,7 @@ public class MagicMimeMimeDetector extends MimeDetector {
 			}
 
 			if (!dir.isDirectory())
-				return Collections.EMPTY_LIST;
+				return Collections.emptyList();
 
 			String s = fileNameSimplePattern.replaceAll("\\.", "\\\\.");
 			s = s.replaceAll("\\*", ".*");
@@ -479,7 +431,7 @@ public class MagicMimeMimeDetector extends MimeDetector {
 
 		BufferedReader br = new BufferedReader(r);
 		String line;
-		ArrayList sequence = new ArrayList();
+		ArrayList<String> sequence = new ArrayList<>();
 
 		long lineNumber = 0;
 		line = br.readLine();
@@ -532,7 +484,7 @@ public class MagicMimeMimeDetector extends MimeDetector {
 	}
 
 	private static void addEntry(final String magicFile, final long lineNumber,
-			final ArrayList aStringArray) {
+			final ArrayList<String> aStringArray) {
 		try {
 			MagicMimeEntry magicEntry = new MagicMimeEntry(aStringArray);
 			mMagicMimeEntries.add(magicEntry);

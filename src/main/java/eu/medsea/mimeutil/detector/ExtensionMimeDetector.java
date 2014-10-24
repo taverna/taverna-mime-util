@@ -98,12 +98,13 @@ public class ExtensionMimeDetector extends MimeDetector {
 	private static Logger log = LoggerFactory.getLogger(ExtensionMimeDetector.class);
 
 	// Extension MimeTypes
-	private static Map extMimeTypes;
+	private static Map<Object,Object> extMimeTypes;
 
 	public ExtensionMimeDetector() {
 		ExtensionMimeDetector.initMimeTypes();
 	}
 
+	@Override
 	public String getDescription() {
 		return "Get the mime types of file extensions";
 	}
@@ -117,7 +118,8 @@ public class ExtensionMimeDetector extends MimeDetector {
 	 * @return collection of the matched mime types.
 	 * @throws MimeException if errors occur.
 	 */
-	public Collection getMimeTypesFile(final File file) throws MimeException {
+	@Override
+	public Collection<MimeType> getMimeTypesFile(final File file) throws MimeException {
 		return getMimeTypesFileName(file.getName());
 	}
 
@@ -128,7 +130,8 @@ public class ExtensionMimeDetector extends MimeDetector {
 	 * @return collection of the matched mime types.
 	 * @throws MimeException if errors occur.
 	 */
-	public Collection getMimeTypesURL(final URL url) throws MimeException {
+	@Override
+	public Collection<MimeType> getMimeTypesURL(final URL url) throws MimeException {
 		return getMimeTypesFileName(url.getPath());
 	}
 
@@ -141,8 +144,9 @@ public class ExtensionMimeDetector extends MimeDetector {
 	 * @return collection of the matched mime types.
 	 * @throws MimeException if errors occur.
 	 */
-	public Collection getMimeTypesFileName(final String fileName) throws MimeException {
-		Collection mimeTypes = new HashSet();
+	@Override
+	public Collection<MimeType> getMimeTypesFileName(final String fileName) throws MimeException {
+		Collection<MimeType> mimeTypes = new HashSet<>();
 
 		String fileExtension = MimeUtil.getExtension(fileName);
 		while(fileExtension.length() != 0) {
@@ -224,9 +228,9 @@ public class ExtensionMimeDetector extends MimeDetector {
 			// override the default mime type entries. Could also be in jar files.
 			// Get an enumeration of all files on the classpath with this name. They could be in jar files as well
 			try {
-				Enumeration e = MimeUtil.class.getClassLoader().getResources("mime-types.properties");
+				Enumeration<URL> e = MimeUtil.class.getClassLoader().getResources("mime-types.properties");
 				while(e.hasMoreElements()) {
-					URL url = (URL)e.nextElement();
+					URL url = e.nextElement();
 					if(log.isDebugEnabled()) {
 						log.debug("Found custom mime-types.properties file on the classpath [" + url + "].");
 					}
@@ -282,9 +286,9 @@ public class ExtensionMimeDetector extends MimeDetector {
 			log.error("Error loading internal mime-types.properties", e);
 		} finally {
 			// Load the mime types into the known mime types map of MimeUtil
-			Iterator it = extMimeTypes.values().iterator();
+			Iterator<Object> it = extMimeTypes.values().iterator();
 			while (it.hasNext()) {
-				String[] types = ((String) it.next()).split(",");
+				String[] types = it.next().toString().split(",");
 				for (int i = 0; i < types.length; i++) {
 					MimeUtil.addKnownMimeType(types[i]);
 				}
@@ -297,7 +301,8 @@ public class ExtensionMimeDetector extends MimeDetector {
 	 * we just throw an {@link UnsupportedOperationException}. This ensures that the getMimeTypes(...) methods ignore this
 	 * method. We could also have just returned an empty collection.
 	 */
-	public Collection getMimeTypesInputStream(InputStream in)
+	@Override
+	public Collection<MimeType> getMimeTypesInputStream(InputStream in)
 			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("This MimeDetector does not support detection from streams.");
 	}
@@ -307,7 +312,8 @@ public class ExtensionMimeDetector extends MimeDetector {
 	 * we just throw an {@link UnsupportedOperationException}. This ensures that the getMimeTypes(...) methods ignore this
 	 * method. We could also have just returned an empty collection.
 	 */
-	public Collection getMimeTypesByteArray(byte[] data)
+	@Override
+	public Collection<MimeType> getMimeTypesByteArray(byte[] data)
 			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("This MimeDetector does not support detection from byte arrays.");
 	}
